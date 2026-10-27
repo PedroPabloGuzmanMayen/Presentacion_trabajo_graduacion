@@ -1,8 +1,8 @@
-import { Check, Database, Filter, GitBranch, KanbanSquare, Layers, Scissors, ShieldCheck, SlidersHorizontal, Sparkles, X } from 'lucide-react'
+import { Brain, Check, Database, Filter, GitBranch, KanbanSquare, Layers, Scissors, ShieldCheck, SlidersHorizontal, Sparkles, X } from 'lucide-react'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import { Badge, Card, CardHead, SceneHeader, Stat } from '@/components/ui'
 import { Legend, useChartStyle } from '@/components/charts'
-import { datos, division, excluidos, fases, gruposVariables, limpieza, meses, seleccion, tecnologias, variablesPorMes } from '@/data/tesis'
+import { algoritmos, datos, division, excluidos, fases, gruposVariables, limpieza, meses, seleccion, tecnologias, variablesPorMes } from '@/data/tesis'
 
 export function DatosScene() {
   const { p, tooltip } = useChartStyle()
@@ -15,19 +15,19 @@ export function DatosScene() {
       <SceneHeader
         eyebrow="Datos"
         title="Cuatro años de notas en Pensamiento Cuantitativo"
-        intro="Datos institucionales de la UVG y del LMS Canvas, proporcionados por la asesora. El carné se reemplazó por un identificador anónimo (Est_ID) y se eliminaron los nombres."
+        intro="Datos de la Universidad y de Canvas entre 2019 y 2022. Para proteger a los estudiantes, el carné se cambió por un código anónimo y se quitaron los nombres."
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Stat label="Tabla de estudiantes" value={datos.filasRegistro.toLocaleString('es-GT')} sub="filas iniciales · PAA, colegio, título, intento, nota final" icon={Database} />
-        <Stat label="Tabla de actividades" value={datos.filasActividades.toLocaleString('es-GT')} sub="filas · entregas, fechas, comentarios, notas" icon={Layers} />
-        <Stat label="Estudiantes finales" value={datos.estudiantesFinal.toLocaleString('es-GT')} sub={`${datos.mujeres} mujeres · ${datos.hombres.toLocaleString('es-GT')} hombres`} icon={ShieldCheck} tone="primary" />
-        <Stat label="Variables construidas" value={datos.variablesConstruidas} sub="un registro por estudiante y semestre" icon={Sparkles} tone="accent" />
+        <Stat label="Estudiantes" value={datos.filasRegistro.toLocaleString('es-GT')} sub="registros iniciales: PAA, colegio, intento y nota final" icon={Database} />
+        <Stat label="Actividades" value={datos.filasActividades.toLocaleString('es-GT')} sub="registros de tareas, parciales y entregas" icon={Layers} />
+        <Stat label="Estudiantes analizados" value={datos.estudiantesFinal.toLocaleString('es-GT')} sub={`${datos.mujeres} mujeres · ${datos.hombres.toLocaleString('es-GT')} hombres`} icon={ShieldCheck} tone="primary" />
+        <Stat label="Variables creadas" value={datos.variablesConstruidas} sub="una fila por estudiante y semestre" icon={Sparkles} tone="accent" />
       </div>
 
       <div className="grid lg:grid-cols-[1.6fr_1fr] gap-4">
         <Card>
-          <CardHead icon={Scissors} title="Fase 1 · Limpieza de datos" hint="Sin valores faltantes, duplicados ni inconsistencias, y con actividades que coinciden con la estructura de cada año del curso." />
+          <CardHead icon={Scissors} title="Limpieza de datos" hint="Antes de entrenar cualquier modelo, la información tenía que estar completa, sin repetidos y sin errores." />
           <ol className="p-5 pt-3 grid sm:grid-cols-2 gap-3">
             {limpieza.map((l, i) => (
               <li key={l.paso} className="rounded-md border border-border bg-card/60 p-3 space-y-1">
@@ -40,7 +40,7 @@ export function DatosScene() {
 
         <div className="flex flex-col gap-4">
           <Card tone="bad">
-            <CardHead icon={Filter} title="Clases desbalanceadas" hint="Solo 1 de cada 7 estudiantes reprueba: un reto que se tomó en cuenta en todo el proyecto." />
+            <CardHead icon={Filter} title="Pocos casos de reprobación" hint="Solo 1 de cada 7 estudiantes reprueba. Eso hace más difícil que un modelo aprenda a reconocerlos, y se tomó en cuenta en todo el proyecto." />
             <div className="p-5 pt-2 flex items-center gap-4">
               <div className="h-36 w-36 shrink-0">
                 <ResponsiveContainer>
@@ -60,7 +60,7 @@ export function DatosScene() {
             </div>
           </Card>
           <Card>
-            <CardHead title="Registros excluidos" hint="La pérdida de información era menor que el riesgo de imputar muchas variables a la vez." />
+            <CardHead title="Registros que se dejaron fuera" hint="Les faltaba demasiada información para usarlos con confianza." />
             <ul className="p-5 pt-3 space-y-2 text-sm">
               {excluidos.map((e) => (
                 <li key={e.motivo} className="flex justify-between gap-3">
@@ -68,10 +68,6 @@ export function DatosScene() {
                   <span className="font-mono num">{e.n}</span>
                 </li>
               ))}
-              <li className="flex justify-between gap-3 border-t border-border pt-2 font-medium">
-                <span>PAA faltante imputada con mediana</span>
-                <span className="font-mono num">395</span>
-              </li>
             </ul>
           </Card>
         </div>
@@ -87,8 +83,8 @@ export function MetodologiaScene() {
     <section className="space-y-6">
       <SceneHeader
         eyebrow="Metodología"
-        title="Seis fases basadas en CRISP-DM"
-        intro="Investigación aplicada. CRISP-DM ordenó las fases del proyecto y permitió regresar a una fase anterior cuando un hallazgo lo pedía; Kanban organizó las tareas dentro de cada fase."
+        title="Seis fases de trabajo"
+        intro="El proyecto siguió CRISP-DM, una guía común para proyectos de ciencia de datos que permite regresar a una fase anterior cuando aparece algo nuevo. Las tareas de cada fase se organizaron con un tablero Kanban."
       />
 
       <Card tone="primary">
@@ -108,12 +104,24 @@ export function MetodologiaScene() {
 
       <div className="grid lg:grid-cols-2 gap-4">
         <Card>
-          <CardHead icon={Layers} title="Un modelo para cada mes" hint="Cada modelo usa solo la información disponible hasta ese mes, igual que ocurriría en la práctica. Mayo se excluyó porque ya contiene la nota final." />
+          <CardHead icon={Brain} title="Algoritmos utilizados" hint="Cada uno se probó con dos enfoques: predecir si el estudiante aprueba o reprueba, y estimar su nota final." />
+          <ul className="p-5 pt-3 divide-y divide-border">
+            {algoritmos.map((a) => (
+              <li key={a.t} className="py-2.5 first:pt-0 last:pb-0">
+                <p className="text-sm font-medium">{a.t}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{a.d}</p>
+              </li>
+            ))}
+          </ul>
+        </Card>
+
+        <Card>
+          <CardHead icon={Layers} title="Un modelo para cada mes" hint="Cada modelo usa solo lo que se sabe hasta ese mes, igual que pasaría en la vida real. Mayo no se incluyó porque ya contiene la nota final." />
           <div className="p-5 pt-3 overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
                 <tr className="text-muted-foreground">
-                  <th className="text-left font-medium py-1.5 pr-3">Variable</th>
+                  <th className="text-left font-medium py-1.5 pr-3">Información</th>
                   {meses.map((m) => <th key={m} className="font-medium py-1.5 px-2 text-center">{m.slice(0, 3)}</th>)}
                 </tr>
               </thead>
@@ -132,9 +140,11 @@ export function MetodologiaScene() {
             </table>
           </div>
         </Card>
+      </div>
 
+      <div className="grid lg:grid-cols-[1fr_1.2fr] gap-4">
         <Card>
-          <CardHead icon={Scissors} title="División de los datos" hint="Muestreo aleatorio estratificado sobre la variable Aprobado." />
+          <CardHead icon={Scissors} title="Cómo se repartieron los datos" hint="Se mantuvo la misma proporción de aprobados y reprobados en cada grupo." />
           <div className="p-5 pt-4 space-y-4">
             <div className="flex h-9 overflow-hidden rounded-md">
               {division.map((d, i) => (
@@ -153,21 +163,17 @@ export function MetodologiaScene() {
             </ul>
           </div>
         </Card>
-      </div>
 
-      <div className="grid md:grid-cols-3 gap-4">
-        <Card tone="accent">
-          <CardHead icon={SlidersHorizontal} title="Hiperparámetros" />
-          <p className="p-5 pt-2 text-xs text-muted-foreground leading-relaxed">Optuna probó <strong className="text-foreground">1,000 combinaciones</strong> por modelo. En clasificación se maximizó la PR-AUC y en regresión se minimizó el RMSE ponderado, ambos sobre validación.</p>
-        </Card>
-        <Card tone="accent">
-          <CardHead icon={ShieldCheck} title="Umbral de decisión" />
-          <p className="p-5 pt-2 text-xs text-muted-foreground leading-relaxed">Se eligió el umbral que maximiza el <strong className="text-foreground">F2-score</strong>: busca balance entre casos detectados y falsas alarmas, pero da el doble de importancia a no dejar escapar a un estudiante en riesgo.</p>
-        </Card>
-        <Card tone="accent">
-          <CardHead icon={Layers} title="Codificación y pesos" />
-          <p className="p-5 pt-2 text-xs text-muted-foreground leading-relaxed">Target encoding para colegio y título, ajustado solo con entrenamiento para evitar fuga de datos. En regresión, cada estudiante pesa <span className="font-mono">n / 2n<sub>c</sub></span> para equilibrar notas menores y mayores a 61.</p>
-        </Card>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Card tone="accent">
+            <CardHead icon={SlidersHorizontal} title="Ajuste de cada modelo" />
+            <p className="p-5 pt-2 text-xs text-muted-foreground leading-relaxed">Se probaron <strong className="text-foreground">1,000 configuraciones</strong> distintas de cada modelo para quedarse con la que mejor funcionaba.</p>
+          </Card>
+          <Card tone="accent">
+            <CardHead icon={ShieldCheck} title="¿Cuándo hay riesgo?" />
+            <p className="p-5 pt-2 text-xs text-muted-foreground leading-relaxed">El objetivo es no dejar pasar a ningún estudiante en riesgo, pero sin llenar al docente de <strong className="text-foreground">falsas alarmas</strong>. Por eso se buscó un equilibrio entre ambas cosas, dando más importancia a detectar los casos reales.</p>
+          </Card>
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5">
@@ -182,9 +188,9 @@ export function VariablesScene() {
   return (
     <section className="space-y-6">
       <SceneHeader
-        eyebrow="Fases 2 y 3 · Características"
-        title="De las calificaciones a variables que predicen"
-        intro="Las nuevas variables se basaron en investigaciones previas y en experiencia con problemas similares, como la detección de fraude. Después, el análisis exploratorio decidió cuáles distinguían de verdad a quienes aprueban de quienes reprueban."
+        eyebrow="Variables"
+        title="De las calificaciones a señales de riesgo"
+        intro="A partir de las notas se crearon nuevos indicadores, basados en investigaciones previas y en experiencia con problemas parecidos, como la detección de fraude. Luego se revisó cuáles realmente ayudaban a distinguir a quienes aprueban de quienes reprueban."
       />
 
       <div className="grid md:grid-cols-3 gap-4">
@@ -199,12 +205,12 @@ export function VariablesScene() {
       </div>
 
       <Card>
-        <CardHead icon={Filter} title="Selección de variables" hint="Prueba U de Mann-Whitney, correlación de Spearman, factor de inflación de la varianza (VIF) y V de Cramér, con α = 0.05." />
+        <CardHead icon={Filter} title="Qué se usó y qué se descartó" hint="Se conservaron los datos que mostraban una diferencia clara entre aprobados y reprobados." />
         <div className="p-5 pt-3 grid lg:grid-cols-2 gap-x-6">
           {[true, false].map((sel) => (
             <div key={String(sel)} className="min-w-0">
               <p className="eyebrow py-2 flex items-center gap-2">
-                {sel ? <Badge tone="good">Seleccionadas · 6</Badge> : <Badge tone="bad">Descartadas · 7</Badge>}
+                {sel ? <Badge tone="good">Se usaron · 6</Badge> : <Badge tone="bad">Se descartaron · 7</Badge>}
               </p>
               <ul className="divide-y divide-border">
                 {seleccion.filter((s) => s.decision === sel).map((s) => (

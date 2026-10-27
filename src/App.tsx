@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState, type ComponentType } from 'react'
 import {
-  BookOpen, ChevronLeft, ChevronRight, ClipboardCheck, Database, FlaskConical, GitBranch, Home, Lightbulb, ListFilter,
+  ChevronLeft, ChevronRight, ClipboardCheck, Database, FlaskConical, GitBranch, Home, Lightbulb, ListFilter,
   Menu, MessagesSquare, Moon, PanelLeftClose, PanelLeftOpen, Sigma, Sparkles, Sun, Target, Wrench, X,
   type LucideIcon,
 } from 'lucide-react'
 import clsx from 'clsx'
-import { InicioScene, MarcoScene, ProblemaScene } from '@/scenes/contexto'
+import { InicioScene, ProblemaScene } from '@/scenes/contexto'
 import { DatosScene, MetodologiaScene, VariablesScene } from '@/scenes/proceso'
 import { ClasificacionScene, HallazgosScene, ImportanciaScene, RegresionScene } from '@/scenes/resultados'
 import { ConclusionesScene, DiscusionScene, HerramientaScene } from '@/scenes/cierre'
@@ -17,7 +17,6 @@ const grupos: Array<{ titulo: string; escenas: Scene[] }> = [
     escenas: [
       { id: 'inicio', label: 'Inicio', icon: Home, component: InicioScene },
       { id: 'problema', label: 'Problema', icon: Target, component: ProblemaScene },
-      { id: 'marco', label: 'Marco teórico', icon: BookOpen, component: MarcoScene },
     ],
   },
   {
@@ -32,9 +31,9 @@ const grupos: Array<{ titulo: string; escenas: Scene[] }> = [
     titulo: 'Resultados',
     escenas: [
       { id: 'hallazgos', label: 'Hallazgos', icon: Lightbulb, component: HallazgosScene },
-      { id: 'clasificacion', label: 'Clasificación', icon: ClipboardCheck, component: ClasificacionScene },
-      { id: 'regresion', label: 'Regresión', icon: Sigma, component: RegresionScene },
-      { id: 'importancia', label: 'Variables influyentes', icon: Sparkles, component: ImportanciaScene },
+      { id: 'clasificacion', label: '¿Aprueba o reprueba?', icon: ClipboardCheck, component: ClasificacionScene },
+      { id: 'regresion', label: '¿Qué nota sacará?', icon: Sigma, component: RegresionScene },
+      { id: 'importancia', label: '¿En qué se fija el modelo?', icon: Sparkles, component: ImportanciaScene },
       { id: 'herramienta', label: 'Herramienta', icon: Wrench, component: HerramientaScene },
     ],
   },
@@ -42,7 +41,7 @@ const grupos: Array<{ titulo: string; escenas: Scene[] }> = [
     titulo: 'Cierre',
     escenas: [
       { id: 'discusion', label: 'Discusión', icon: MessagesSquare, component: DiscusionScene },
-      { id: 'conclusiones', label: 'Conclusiones', icon: FlaskConical, component: ConclusionesScene },
+      { id: 'conclusiones', label: 'Conclusiones y recomendaciones', icon: FlaskConical, component: ConclusionesScene },
     ],
   },
 ]
@@ -133,7 +132,7 @@ export default function App() {
                 )}
               >
                 <Icon size={15} className={clsx('shrink-0', on && 'text-primary')} aria-hidden="true" />
-                {!compact && <span className="truncate">{s.label}</span>}
+                {!compact && <span className="text-left leading-snug">{s.label}</span>}
               </button>
             )
           })}

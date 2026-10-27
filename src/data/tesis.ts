@@ -26,13 +26,13 @@ export const datos = {
 }
 
 export const limpieza = [
-  { paso: 'Validación de tipos', detalle: 'PAA, NotaFinal y VecesCurso pasaron de texto a número; Est_ID a texto; fechas a datetime.' },
-  { paso: 'Validación de rangos', detalle: 'PAA tenía valores de 0 a 2,700 (escala real 200–1,600). Los valores fuera de rango se reemplazaron por la mediana.' },
-  { paso: 'Normalización de texto', detalle: 'Mayúsculas, sin tildes ni espacios extra en Colegio, Título, Actividad, Género y Estado.' },
-  { paso: 'Duplicados', detalle: 'Una sola fila por Año + Ciclo + Sección + Estudiante + Actividad. Se reconstruyeron intentos previos de quienes repitieron el curso.' },
-  { paso: 'Valores faltantes', detalle: '318 registros sin datos (incluido el "Estudiante de prueba" de Canvas) y 112 retiros o convalidaciones se excluyeron. 395 PAA faltantes se imputaron con la mediana.' },
-  { paso: 'Actividades incompletas', detalle: 'Se estimó la nota de actividades faltantes con una división ponderada que cuadra con la nota final registrada.' },
-  { paso: 'Categorías poco frecuentes', detalle: 'Colegios y títulos con menos de 10 apariciones se agruparon como "OTRO".' },
+  { paso: 'Formatos corregidos', detalle: 'Notas, puntajes y fechas guardados como texto se convirtieron al formato correcto.' },
+  { paso: 'Valores imposibles', detalle: 'Había puntajes de la PAA de hasta 2,700 cuando la escala llega a 1,600. Se reemplazaron por el valor típico.' },
+  { paso: 'Textos uniformes', detalle: 'Nombres de colegios, títulos y actividades se escribieron de la misma forma para poder compararlos.' },
+  { paso: 'Registros repetidos', detalle: 'Se dejó una sola fila por estudiante y actividad, y se reconstruyeron los intentos anteriores de quienes repitieron el curso.' },
+  { paso: 'Datos faltantes', detalle: 'Se excluyeron registros casi vacíos (incluido un estudiante de prueba de Canvas) y retiros. Las PAA faltantes se completaron con el valor típico.' },
+  { paso: 'Actividades incompletas', detalle: 'Se estimó la nota de las actividades faltantes para que la suma coincidiera con la nota final registrada.' },
+  { paso: 'Categorías pequeñas', detalle: 'Colegios y títulos con menos de 10 estudiantes se agruparon como "Otro".' },
 ]
 
 export const excluidos = [
@@ -43,18 +43,18 @@ export const excluidos = [
 
 // ---------- Metodología ----------
 export const fases = [
-  { n: 1, nombre: 'Limpieza de datos', resumen: 'Tipos, rangos, duplicados, valores faltantes y consistencia con la estructura del curso.' },
-  { n: 2, nombre: 'Extracción de características', resumen: 'Variables de rendimiento, comportamiento en el LMS y contexto del curso.' },
-  { n: 3, nombre: 'Análisis exploratorio', resumen: 'Mann-Whitney, correlación de Spearman, VIF y V de Cramér para elegir variables.' },
-  { n: 4, nombre: 'Desarrollo de modelos', resumen: '40 modelos: 5 algoritmos × 4 meses × 2 enfoques. Optuna con 1,000 combinaciones.' },
-  { n: 5, nombre: 'Evaluación de modelos', resumen: 'Sensibilidad, precisión, F2 y PR-AUC; RMSE, MAE y correlación en regresión.' },
-  { n: 6, nombre: 'Prueba de concepto', resumen: 'Interfaz en Gradio desplegada en Hugging Face Spaces.' },
+  { n: 1, nombre: 'Limpieza de datos', resumen: 'Revisar que la información estuviera completa, sin repetidos ni errores.' },
+  { n: 2, nombre: 'Creación de variables', resumen: 'Convertir las calificaciones en indicadores útiles, como el porcentaje acumulado de cada mes.' },
+  { n: 3, nombre: 'Análisis exploratorio', resumen: 'Buscar qué datos realmente distinguen a quienes aprueban de quienes reprueban.' },
+  { n: 4, nombre: 'Desarrollo de modelos', resumen: 'Entrenar 40 modelos: 5 algoritmos, para cada mes y con dos enfoques.' },
+  { n: 5, nombre: 'Evaluación de modelos', resumen: 'Medir cuántos casos detecta cada modelo y cuántas falsas alarmas genera.' },
+  { n: 6, nombre: 'Prueba de concepto', resumen: 'Construir una herramienta web para usar el mejor modelo.' },
 ]
 
 export const division = [
-  { conjunto: 'Entrenamiento', pct: 70, uso: 'Entrenar los modelos y hacer el análisis exploratorio.' },
-  { conjunto: 'Validación', pct: 15, uso: 'Ajustar hiperparámetros y elegir el umbral de decisión.' },
-  { conjunto: 'Prueba', pct: 15, uso: 'Medir el desempeño con datos que el modelo nunca vio.' },
+  { conjunto: 'Entrenamiento', pct: 70, uso: 'Con estos datos los modelos aprenden los patrones.' },
+  { conjunto: 'Validación', pct: 15, uso: 'Sirven para ajustar cada modelo y decidir a partir de qué punto se considera que hay riesgo.' },
+  { conjunto: 'Prueba', pct: 15, uso: 'Datos que el modelo nunca vio, para medir qué tan bien detecta el riesgo.' },
 ]
 
 export const variablesPorMes: Array<{ variable: string; meses: [boolean, boolean, boolean, boolean] }> = [
@@ -66,38 +66,45 @@ export const variablesPorMes: Array<{ variable: string; meses: [boolean, boolean
   { variable: 'Notas de parciales hasta el mes', meses: [false, true, true, true] },
 ]
 
-export const tecnologias = ['Python 3.10', 'Pandas', 'Scikit-learn', 'XGBoost', 'LightGBM', 'Optuna', 'Seaborn', 'Gradio', 'Hugging Face Spaces', 'Jupyter', 'GitHub']
+export const tecnologias = ['Python', 'Pandas', 'Scikit-learn', 'XGBoost', 'LightGBM', 'Optuna', 'Gradio', 'Hugging Face']
+
+export const algoritmos = [
+  { t: 'Árbol de decisión', d: 'Hace preguntas sencillas sobre los datos, como "¿su porcentaje acumulado es menor a 70 %?", hasta llegar a una respuesta.' },
+  { t: 'Random Forest', d: 'Combina cientos de árboles de decisión y se queda con la respuesta en la que coinciden la mayoría.' },
+  { t: 'XGBoost y LightGBM', d: 'También combinan árboles, pero cada árbol nuevo aprende de los errores de los anteriores.' },
+  { t: 'Regresión logística y lineal', d: 'Modelos más simples que sirven como punto de comparación.' },
+]
 
 // ---------- Variables ----------
 export const gruposVariables = [
   {
     grupo: 'Rendimiento en el curso',
-    items: ['% acumulado en actividades al cierre de cada mes', 'Nota del parcial de cada mes', 'Cambio mensual del % acumulado', 'Puntuación Z respecto a la sección'],
+    items: ['Porcentaje acumulado en actividades al final de cada mes', 'Nota del parcial de cada mes', 'Cambio de un mes a otro', 'Comparación con el resto de la sección'],
   },
   {
-    grupo: 'Comportamiento en el LMS',
-    items: ['Entregas tardías acumuladas', 'Cantidad de comentarios', 'Velocidad de calificación (días)'],
+    grupo: 'Comportamiento en Canvas',
+    items: ['Entregas tardías', 'Cantidad de comentarios', 'Días que tardaban en calificar las tareas'],
   },
   {
     grupo: 'Contexto del curso',
-    items: ['Modalidad: virtual (2020–2021) o presencial'],
+    items: ['Modalidad: virtual (pandemia) o presencial'],
   },
 ]
 
 export const seleccion = [
-  { variable: 'Porcentaje acumulado en actividades', decision: true, motivo: 'Distribución distinta entre clases y correlación fuerte con el resultado.' },
-  { variable: 'Notas en exámenes parciales', decision: true, motivo: 'Distribución distinta entre clases y correlación fuerte con el resultado.' },
-  { variable: 'Número de intento', decision: true, motivo: 'p = 9.65 × 10⁻¹⁷⁸; correlación fuerte con Aprobado.' },
-  { variable: 'Puntaje PAA', decision: true, motivo: 'p = 8.58 × 10⁻²⁷; correlación moderada con la nota final.' },
-  { variable: 'Colegio', decision: true, motivo: 'V de Cramér = 0.304, asociación moderada.' },
-  { variable: 'Título de nivel medio', decision: true, motivo: 'V de Cramér = 0.228; se conservó para medir su efecto.' },
-  { variable: 'Puntuaciones Z', decision: false, motivo: 'Multicolinealidad con las variables originales (VIF hasta 13.8).' },
-  { variable: 'Cambio en el % acumulado', decision: false, motivo: 'Correlación débil con el resultado.' },
-  { variable: 'Entregas tardías', decision: false, motivo: 'Sin diferencia significativa en ningún mes.' },
-  { variable: 'Cantidad de comentarios', decision: false, motivo: 'p = 0.329, sin diferencia significativa.' },
-  { variable: 'Velocidad de calificación', decision: false, motivo: 'p = 0.049, pero correlación débil.' },
-  { variable: 'Modalidad y año', decision: false, motivo: 'Reflejan la pandemia, condición que no se repetirá.' },
-  { variable: 'Género', decision: false, motivo: 'V de Cramér = 0.062, asociación débil.' },
+  { variable: 'Porcentaje acumulado en actividades', decision: true, motivo: 'Es muy distinto entre quienes aprueban y quienes reprueban.' },
+  { variable: 'Notas en los parciales', decision: true, motivo: 'Es muy distinto entre quienes aprueban y quienes reprueban.' },
+  { variable: 'Número de intento', decision: true, motivo: 'Quienes repiten el curso reprueban mucho más.' },
+  { variable: 'Puntaje en la PAA', decision: true, motivo: 'Quienes aprueban suelen tener un puntaje más alto.' },
+  { variable: 'Colegio', decision: true, motivo: 'Tiene una relación moderada con aprobar o reprobar.' },
+  { variable: 'Título de nivel medio', decision: true, motivo: 'Tiene una relación moderada; se conservó para medir su efecto.' },
+  { variable: 'Comparación con la sección', decision: false, motivo: 'Repetía la misma información que el porcentaje acumulado y las notas.' },
+  { variable: 'Cambio de un mes a otro', decision: false, motivo: 'Casi no se relaciona con el resultado final.' },
+  { variable: 'Entregas tardías', decision: false, motivo: 'Aprobados y reprobados entregan tarde por igual.' },
+  { variable: 'Cantidad de comentarios', decision: false, motivo: 'No hay diferencia entre aprobados y reprobados.' },
+  { variable: 'Días para calificar', decision: false, motivo: 'La diferencia es mínima.' },
+  { variable: 'Modalidad y año', decision: false, motivo: 'Reflejan la pandemia, una situación que no se repetirá.' },
+  { variable: 'Género', decision: false, motivo: 'La diferencia es pequeña y la relación es débil.' },
 ]
 
 // ---------- Hallazgos del análisis exploratorio ----------
@@ -205,7 +212,7 @@ export const promediosReg = [
 // ---------- Importancia de variables (Figuras 6.6–6.15) ----------
 // Valores normalizados leídos de las gráficas de la tesis (aproximados a dos decimales).
 // Orden: [intentos, % acumulado, examen del mes, exámenes previos, PAA, colegio, título]
-export const variablesImp = ['Número de intento', '% acumulado actividades', 'Examen del mes', 'Exámenes previos', 'PAA', 'Colegio', 'Título nivel medio'] as const
+export const variablesImp = ['Número de intento', '% acumulado en actividades', 'Parcial del mes', 'Parciales anteriores', 'Puntaje PAA', 'Colegio', 'Título de nivel medio'] as const
 
 type Imp = Record<string, number[][]>
 export const importanciaClf: Imp = {
@@ -228,22 +235,22 @@ export const reprobadosPrueba = 48
 
 // ---------- Cierre ----------
 export const conclusiones = [
-  'Se desarrolló un modelo de aprendizaje automático capaz de identificar de forma temprana el riesgo de reprobación en Pensamiento Cuantitativo. Desde el primer mes detectó al menos el 89.6 % de los estudiantes reprobados del conjunto de prueba.',
-  'Se construyeron modelos de clasificación y de regresión con cinco algoritmos (Árbol de Decisión, Random Forest, XGBoost, LightGBM y Regresión Logística o Lineal), uno para cada mes del semestre.',
-  'Un proceso de limpieza exhaustivo garantizó la calidad de los datos usados para entrenar los modelos.',
-  'El análisis exploratorio mostró que quienes reprueban suelen tener bajo rendimiento en actividades y parciales, menor nota en la PAA y más intentos del curso.',
-  'Random Forest fue el modelo con mejor desempeño: detectó más del 89.6 % de los casos de reprobación en todos los meses, con alta precisión y pocas falsas alarmas.',
-  'Los modelos de regresión son menos confiables en los primeros meses (error de más de 10 puntos), pero sirven como complemento de la clasificación.',
-  'Se desarrolló una interfaz en Gradio que usa el modelo Random Forest, muestra sus predicciones y permite exportarlas en .csv.',
+  'Se desarrolló un modelo de aprendizaje automático que identifica a tiempo a los estudiantes en riesgo de reprobar Pensamiento Cuantitativo. Desde el primer mes detectó al menos al 89.6 % de quienes reprobaron.',
+  'Se construyeron modelos con cinco algoritmos distintos, uno para cada mes del semestre, tanto para predecir si un estudiante aprueba como para estimar su nota final.',
+  'Una limpieza cuidadosa de los datos garantizó que los modelos aprendieran de información confiable.',
+  'Quienes reprueban suelen tener bajo rendimiento en actividades y parciales, menor puntaje en la PAA y más intentos del curso.',
+  'Random Forest fue el mejor modelo: detectó más del 89.6 % de los casos en todos los meses y generó pocas falsas alarmas.',
+  'Estimar la nota exacta es poco confiable en los primeros meses (error de más de 10 puntos), pero sirve como apoyo al modelo principal.',
+  'Se construyó una herramienta web que usa el modelo, muestra sus resultados y permite descargarlos.',
 ]
 
 export const recomendaciones = [
-  { titulo: 'Más tipos de variables', texto: 'Reentrenar con factores socioeconómicos y demográficos, con las autorizaciones correspondientes y verificando que no haya sesgos.' },
-  { titulo: 'Datos recientes', texto: 'Evaluar los modelos con semestres más recientes para confirmar que conservan su capacidad predictiva.' },
-  { titulo: 'Entorno productivo', texto: 'Analizar la viabilidad de integrar los modelos para que los use el personal docente.' },
-  { titulo: 'Otros cursos clave', texto: 'Replicar el proceso en Física, Programación Básica, Álgebra Lineal, Ecuaciones Diferenciales o Química.' },
-  { titulo: 'Efecto de las tutorías', texto: 'Medir el efecto de las tutorías institucionales en el rendimiento de los estudiantes.' },
-  { titulo: 'IA institucional', texto: 'Explorar si los LLM que provee la institución pueden personalizar el aprendizaje.' },
-  { titulo: 'Un modelo por departamento', texto: 'Evaluar si los cursos de primer año de Matemática comparten patrones y pueden usar un solo modelo.' },
-  { titulo: 'Interacción con el LMS', texto: 'Usar años recientes para capturar mejor los tiempos de entrega y la interacción en Canvas.' },
+  { titulo: 'Más información del estudiante', texto: 'Agregar datos socioeconómicos y demográficos, con las autorizaciones necesarias y cuidando que el modelo no tenga sesgos.' },
+  { titulo: 'Datos recientes', texto: 'Probar los modelos con semestres más recientes para confirmar que siguen funcionando igual de bien.' },
+  { titulo: 'Uso real', texto: 'Analizar si es viable integrar los modelos para que los use el personal docente.' },
+  { titulo: 'Otros cursos clave', texto: 'Repetir el proceso en Física, Programación Básica, Álgebra Lineal, Ecuaciones Diferenciales o Química.' },
+  { titulo: 'Efecto de las tutorías', texto: 'Medir cómo influyen las tutorías de la Universidad en el rendimiento.' },
+  { titulo: 'Inteligencia artificial', texto: 'Explorar si las herramientas de IA de la Universidad pueden personalizar el aprendizaje.' },
+  { titulo: 'Un modelo por departamento', texto: 'Evaluar si los cursos de primer año de Matemática siguen los mismos patrones y pueden usar un solo modelo.' },
+  { titulo: 'Interacción en Canvas', texto: 'Usar años recientes para entender mejor los tiempos de entrega y el uso de la plataforma.' },
 ]

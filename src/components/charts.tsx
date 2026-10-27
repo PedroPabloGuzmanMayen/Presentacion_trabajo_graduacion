@@ -36,7 +36,7 @@ export function IqrBar({ label, q1, med, q3, min, max, color, unit = '' }: { lab
   return (
     <div className="grid grid-cols-[minmax(0,6.5rem)_1fr_auto] items-center gap-3">
       <span className="text-xs text-muted-foreground truncate">{label}</span>
-      <div className="relative h-7 rounded bg-muted/50" title={`Q1 ${q1} · mediana ${med} · Q3 ${q3}`}>
+      <div className="relative h-7 rounded bg-muted/50" title={`La mitad de los estudiantes está entre ${q1} y ${q3}; el típico tiene ${med}`}>
         <div className="absolute inset-y-1 rounded-sm" style={{ left: `${x(q1)}%`, width: `${x(q3) - x(q1)}%`, background: color, opacity: 0.85 }} />
         <div className="absolute inset-y-0 w-0.5 bg-foreground" style={{ left: `${x(med)}%` }} />
       </div>

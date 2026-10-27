@@ -12,7 +12,7 @@ npm run build:artifact   # un solo archivo HTML en dist-artifact/
 ```
 
 - Navega con las flechas ← → del teclado o con los botones al pie de cada sección.
-- Cada sección tiene su enlace directo: `#inicio`, `#problema`, `#marco`, `#datos`, `#metodologia`,
+- Cada sección tiene su enlace directo: `#inicio`, `#problema`, `#datos`, `#metodologia`,
   `#variables`, `#hallazgos`, `#clasificacion`, `#regresion`, `#importancia`, `#herramienta`,
   `#discusion`, `#conclusiones`.
 - Todas las cifras están en `src/data/tesis.ts`. Las importancias de variables se leyeron de las
