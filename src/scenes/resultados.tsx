@@ -211,7 +211,7 @@ export function RegresionScene() {
   const regColor = (i: number) => (i === 4 ? p.primary : [p['chart-5'], p['chart-2'], p['chart-3'], p['chart-4']][i])
   const data = meses.map((mes) => {
     const row: Record<string, number | string> = { mes: mesCorto(mes) }
-    for (const m of modelosReg) row[m] = regresion.find((r) => r.modelo === m && r.mes === mes)!.mae
+    for (const m of modelosReg) row[m] = regresion.find((r) => r.modelo === m && r.mes === mes)!.rmse
     return row
   })
   return (
@@ -219,30 +219,30 @@ export function RegresionScene() {
       <SceneHeader
         eyebrow="Resultados · ¿Qué nota sacará?"
         title="Estimar la nota exacta es difícil al inicio"
-        intro="El segundo enfoque intentó adivinar la nota final. El mejor modelo fue la regresión lineal, pero en los primeros meses se equivoca por unos 10 puntos o más. Como muchos estudiantes quedan cerca de 61, ese margen no alcanza para saber quién va a reprobar."
+        intro="El segundo enfoque intentó adivinar la nota final. El mejor modelo fue la regresión lineal, pero en enero su error ronda entre 10 y 15 puntos. Como muchos estudiantes quedan cerca de 61, ese margen no alcanza para saber quién va a reprobar."
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Stat label="Mejor modelo" value="Lineal" sub="Regresión lineal" icon={Award} tone="primary" />
-        <Stat label="Error en enero" value="11.5 pts" sub="en promedio, sobre 100" icon={Sigma} tone="bad" />
-        <Stat label="Error en abril" value="3.0 pts" sub="en promedio, sobre 100" icon={Sigma} tone="good" />
+        <Stat label="Error en enero" value="14.9 pts" sub="RMSE, sobre 100 puntos" icon={Sigma} tone="bad" />
+        <Stat label="Error en abril" value="4.1 pts" sub="RMSE, sobre 100 puntos" icon={Sigma} tone="good" />
         <Stat label="Cerca del límite" value="210+" sub="estudiantes con nota entre 56 y 65" icon={Ruler} tone="warn" />
       </div>
 
       <Card>
         <CardHead
           icon={Sigma}
-          title="Error promedio de la nota estimada, por mes"
-          hint="En puntos de la nota final (0 a 100). Menos es mejor. La franja marca un error de 10 puntos o más."
+          title="Error de la nota estimada por mes (RMSE)"
+          hint="Cuántos puntos se equivoca, en promedio, la nota estimada (escala de 0 a 100). Menos es mejor. La franja marca un error de 10 puntos o más."
         />
         <div className="h-72 px-2 pt-4">
           <ResponsiveContainer>
             <LineChart data={data} margin={{ right: 24, left: -8, top: 8 }}>
               <CartesianGrid {...grid} />
-              <ReferenceArea y1={10} y2={14} fill={p.bad} fillOpacity={0.08} />
+              <ReferenceArea y1={10} y2={16} fill={p.bad} fillOpacity={0.08} />
               <ReferenceLine y={10} stroke={p.bad} strokeDasharray="4 4" label={{ value: '10 pts', position: 'insideTopRight', fill: p.bad, fontSize: 11 }} />
               <XAxis dataKey="mes" {...axis} />
-              <YAxis domain={[0, 14]} {...axis} />
+              <YAxis domain={[0, 16]} {...axis} />
               <Tooltip {...tooltip} formatter={(v: number) => `${v.toFixed(1)} pts`} />
               {modelosReg.map((m, i) => (
                 <Line key={m} dataKey={m} stroke={regColor(i)} strokeWidth={m === 'Regresión lineal' ? 3 : 1.75} dot={{ r: m === 'Regresión lineal' ? 4 : 2.5, fill: regColor(i) }} />
@@ -255,20 +255,20 @@ export function RegresionScene() {
 
       <div className="grid lg:grid-cols-[1.3fr_1fr] gap-4">
         <Card>
-          <CardHead title="Error promedio de los cuatro meses" />
+          <CardHead title="Error promedio de los cuatro meses (RMSE)" />
           <div className="p-5 pt-3 overflow-x-auto">
             <table className="w-full text-sm min-w-[300px]">
               <thead>
                 <tr className="text-xs text-muted-foreground">
                   <th className="text-left font-medium py-2">Modelo</th>
-                  <th className="text-right font-medium py-2">Error promedio</th>
+                  <th className="text-right font-medium py-2">RMSE</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {promediosReg.map((r) => (
                   <tr key={r.modelo} className={clsx(r.modelo === 'Regresión lineal' && 'bg-primary/5')}>
                     <td className="py-2.5 font-medium">{r.modelo}</td>
-                    <td className="py-2.5 text-right font-mono num">{r.mae.toFixed(1)} pts</td>
+                    <td className="py-2.5 text-right font-mono num">{r.rmse.toFixed(1)} pts</td>
                   </tr>
                 ))}
               </tbody>
