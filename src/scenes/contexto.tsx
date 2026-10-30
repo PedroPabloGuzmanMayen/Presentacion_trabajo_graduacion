@@ -44,7 +44,7 @@ export function ProblemaScene() {
     <section className="space-y-6">
       <SceneHeader
         eyebrow="El problema"
-        title="Reprobar un curso clave cuesta más que una nota"
+        title="La reprobación y su relación con la deserción"
         intro="El estudiante se atrasa en su carrera, pierde tiempo y muchas veces pierde motivación. Varios estudios relacionan reprobar estos cursos con abandonar la universidad."
       />
 
