@@ -17,9 +17,9 @@ export function useChartStyle() {
   }
 }
 
-export function Legend({ items }: { items: Array<{ label: string; color: string; strong?: boolean }> }) {
+export function Legend({ items, className = 'text-xs' }: { items: Array<{ label: string; color: string; strong?: boolean }>; className?: string }) {
   return (
-    <ul className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+    <ul className={`flex flex-wrap gap-x-4 gap-y-1.5 text-muted-foreground ${className}`}>
       {items.map((i) => (
         <li key={i.label} className="flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: i.color }} aria-hidden="true" />

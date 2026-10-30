@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useState, type ComponentType } from 'react'
 import {
-  ChevronLeft, ChevronRight, ClipboardCheck, Database, FlaskConical, GitBranch, Home, Lightbulb, ListFilter,
+  BarChart3, Brain, ChevronLeft, ChevronRight, HelpCircle, Maximize2, Minimize2, NotebookPen, ClipboardCheck, Database, FlaskConical, GitBranch, Home, Lightbulb, ListFilter,
   Menu, MessagesSquare, Scissors, Search, Workflow, Moon, PanelLeftClose, PanelLeftOpen, Sigma, Sparkles, Sun, Target, Wrench, X,
   type LucideIcon,
 } from 'lucide-react'
 import clsx from 'clsx'
-import { InicioScene, ProblemaScene } from '@/scenes/contexto'
-import { CaracteristicasScene, DatosScene, EntrenamientoScene, ExploratorioScene, FasesScene, LimpiezaScene } from '@/scenes/proceso'
-import { ClasificacionScene, HallazgosScene, ImportanciaScene, RegresionScene } from '@/scenes/resultados'
+import { InicioScene, PreguntaScene, ProblemaScene } from '@/scenes/contexto'
+import { CaracteristicasScene, DatosScene, EntrenamientoScene, ExploratorioScene, FasesScene, LimpiezaScene, ModelosScene } from '@/scenes/proceso'
+import { ClasificacionScene, ComparacionScene, HallazgosScene, ImportanciaScene, RegresionScene } from '@/scenes/resultados'
+import { notas } from '@/data/notas'
 import { ConclusionesScene, DiscusionScene, HerramientaScene } from '@/scenes/cierre'
 
 type Scene = { id: string; label: string; icon: LucideIcon; component: ComponentType }
@@ -16,7 +17,8 @@ const grupos: Array<{ titulo: string; escenas: Scene[] }> = [
     titulo: 'Contexto',
     escenas: [
       { id: 'inicio', label: 'Inicio', icon: Home, component: InicioScene },
-      { id: 'problema', label: 'Problema', icon: Target, component: ProblemaScene },
+      { id: 'problema', label: 'El problema', icon: Target, component: ProblemaScene },
+      { id: 'pregunta', label: 'La pregunta', icon: HelpCircle, component: PreguntaScene },
     ],
   },
   {
@@ -27,6 +29,7 @@ const grupos: Array<{ titulo: string; escenas: Scene[] }> = [
       { id: 'limpieza', label: 'Limpieza de datos', icon: Scissors, component: LimpiezaScene },
       { id: 'variables', label: 'Creación de variables', icon: ListFilter, component: CaracteristicasScene },
       { id: 'exploratorio', label: 'Análisis exploratorio', icon: Search, component: ExploratorioScene },
+      { id: 'modelos', label: 'Modelos', icon: Brain, component: ModelosScene },
       { id: 'entrenamiento', label: 'Entrenamiento', icon: Workflow, component: EntrenamientoScene },
     ],
   },
@@ -34,8 +37,9 @@ const grupos: Array<{ titulo: string; escenas: Scene[] }> = [
     titulo: 'Resultados',
     escenas: [
       { id: 'hallazgos', label: 'Hallazgos', icon: Lightbulb, component: HallazgosScene },
-      { id: 'clasificacion', label: '¿Aprueba o reprueba?', icon: ClipboardCheck, component: ClasificacionScene },
-      { id: 'regresion', label: '¿Qué nota sacará?', icon: Sigma, component: RegresionScene },
+      { id: 'clasificacion', label: 'Casos detectados', icon: ClipboardCheck, component: ClasificacionScene },
+      { id: 'comparacion', label: 'Comparación de modelos', icon: BarChart3, component: ComparacionScene },
+      { id: 'regresion', label: 'Nota estimada', icon: Sigma, component: RegresionScene },
       { id: 'importancia', label: '¿En qué se fija el modelo?', icon: Sparkles, component: ImportanciaScene },
       { id: 'herramienta', label: 'Herramienta', icon: Wrench, component: HerramientaScene },
     ],
@@ -71,6 +75,8 @@ export default function App() {
   const [collapsed, setCollapsed] = useState(() => store.get('tesis-sidebar') === 'collapsed')
   const [drawer, setDrawer] = useState(false)
   const [dark, setDark] = useState(isDark)
+  const [showNotes, setShowNotes] = useState(() => store.get('tesis-notas') === '1')
+  const [focus, setFocus] = useState(false)
 
   const index = escenas.findIndex((s) => s.id === active)
   const Active = escenas[index].component
@@ -94,12 +100,16 @@ export default function App() {
       if (el.closest('input, textarea, [role="radiogroup"]')) return
       if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); step(1) }
       if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); step(-1) }
+      if (e.key === 'n' || e.key === 'N') setShowNotes((v) => !v)
+      if (e.key === 'f' || e.key === 'F') setFocus((v) => !v)
+      if (e.key === 'Escape') setFocus(false)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [step])
 
   useEffect(() => { store.set('tesis-sidebar', collapsed ? 'collapsed' : 'expanded') }, [collapsed])
+  useEffect(() => { store.set('tesis-notas', showNotes ? '1' : '0') }, [showNotes])
 
   useEffect(() => {
     const sync = () => setDark(isDark())
@@ -169,7 +179,7 @@ export default function App() {
   return (
     <div className="flex h-full overflow-hidden bg-background text-foreground">
       {/* Barra lateral (escritorio) */}
-      <aside className={clsx('hidden md:flex border-r border-border flex-col transition-[width] duration-200 ease-out', collapsed ? 'w-14' : 'w-60')}>
+      <aside className={clsx(focus ? 'hidden' : 'hidden md:flex', 'border-r border-border flex-col transition-[width] duration-200 ease-out', collapsed ? 'w-14' : 'w-60')}>
         <div className="flex items-center justify-between gap-2 px-3 py-3 border-b border-border/60">
           {!collapsed && brand}
           <button
@@ -183,7 +193,7 @@ export default function App() {
         </div>
         {nav(collapsed)}
         <div className={clsx('border-t border-border/60 px-3 py-3 flex items-center gap-2', collapsed ? 'justify-center' : 'justify-between')}>
-          {!collapsed && <p className="text-[10px] text-muted-foreground">Usa ← → para avanzar</p>}
+          {!collapsed && <p className="text-[10px] text-muted-foreground leading-snug">← → avanzar · N notas<br />F pantalla completa</p>}
           {themeButton}
         </div>
       </aside>
@@ -213,10 +223,19 @@ export default function App() {
         </div>
 
         <main id="main" className="flex-1 overflow-y-auto">
-          <div className="gutter md:px-8 py-6 md:py-8 max-w-6xl">
-            <div key={active} className="scene-enter">
+          <div className={clsx('gutter md:px-10 py-6 md:py-10 min-h-full flex flex-col', focus ? 'max-w-7xl mx-auto' : 'max-w-6xl')}>
+            <div key={active} className="scene-enter flex-1 flex flex-col justify-center">
               <Active />
             </div>
+
+            {showNotes && notas[active] && (
+              <aside className="mt-8 rounded-lg border border-dashed border-accent/50 bg-accent/5 p-4" aria-label="Notas del presentador">
+                <p className="eyebrow mb-2 flex items-center gap-1.5"><NotebookPen size={12} aria-hidden="true" /> Notas del presentador</p>
+                <ul className="space-y-1.5 text-sm leading-relaxed text-muted-foreground list-disc pl-5">
+                  {notas[active].map((n) => <li key={n}>{n}</li>)}
+                </ul>
+              </aside>
+            )}
 
             <footer className="mt-10 pt-4 border-t border-border flex items-center justify-between gap-3">
               <button
@@ -227,7 +246,28 @@ export default function App() {
               >
                 <ChevronLeft size={15} aria-hidden="true" /><span className="truncate">{prev ? prev.label : 'Anterior'}</span>
               </button>
-              <span className="text-xs text-muted-foreground font-mono num shrink-0">{index + 1} / {escenas.length}</span>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowNotes((v) => !v)}
+                  aria-pressed={showNotes}
+                  title="Notas del presentador (N)"
+                  className={clsx('flex items-center gap-1.5 rounded-md border px-2.5 py-2 text-xs transition-colors', showNotes ? 'border-accent/60 bg-accent/10 text-foreground' : 'border-border text-muted-foreground hover:bg-muted')}
+                >
+                  <NotebookPen size={14} aria-hidden="true" /><span className="hidden sm:inline">Notas</span>
+                </button>
+                <span className="text-xs text-muted-foreground font-mono num">{index + 1} / {escenas.length}</span>
+                <button
+                  type="button"
+                  onClick={() => setFocus((v) => !v)}
+                  aria-pressed={focus}
+                  title="Pantalla completa (F)"
+                  className="hidden md:flex rounded-md border border-border p-2 text-muted-foreground hover:bg-muted"
+                  aria-label={focus ? 'Mostrar menú' : 'Ocultar menú'}
+                >
+                  {focus ? <Minimize2 size={14} aria-hidden="true" /> : <Maximize2 size={14} aria-hidden="true" />}
+                </button>
+              </div>
               <button
                 type="button"
                 onClick={() => step(1)}

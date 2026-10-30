@@ -11,9 +11,12 @@ npm run build            # versión estática en dist/
 npm run build:artifact   # un solo archivo HTML en dist-artifact/
 ```
 
-- Navega con las flechas ← → del teclado o con los botones al pie de cada sección.
-- Cada sección tiene su enlace directo: `#inicio`, `#problema`, `#datos`, `#fases`,
-  `#limpieza`, `#variables`, `#exploratorio`, `#entrenamiento`, `#hallazgos`, `#clasificacion`, `#regresion`, `#importancia`, `#herramienta`,
-  `#discusion`, `#conclusiones`.
+- Navega con las flechas ← → del teclado o con los botones al pie de cada diapositiva.
+- **N** muestra u oculta las notas del presentador (en `src/data/notas.ts`).
+- **F** oculta el menú lateral para presentar en pantalla completa.
+- Cada diapositiva tiene su enlace directo: `#inicio`, `#problema`, `#pregunta`, `#datos`, `#fases`,
+  `#limpieza`, `#variables`, `#exploratorio`, `#modelos`, `#entrenamiento`, `#hallazgos`,
+  `#clasificacion`, `#comparacion`, `#regresion`, `#importancia`, `#herramienta`, `#discusion`,
+  `#conclusiones`.
 - Todas las cifras están en `src/data/tesis.ts`. Las importancias de variables se leyeron de las
-  figuras 6.6–6.15 (valores aproximados); reemplázalas por las exactas si las tienes.
+  figuras 6.6–6.15 (valores aproximados).

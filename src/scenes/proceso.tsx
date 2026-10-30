@@ -1,395 +1,277 @@
-import { ArrowRight, Brain, Check, Database, FileSpreadsheet, Filter, GitBranch, KanbanSquare, Layers, Lock, Scissors, ShieldCheck, Sparkles, Target, Users, Workflow, X } from 'lucide-react'
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
-import { Badge, Card, CardHead, SceneHeader, Stat } from '@/components/ui'
-import { Legend, useChartStyle } from '@/components/charts'
 import {
-  algoritmos, datos, division, excluidos, fases, flujoEntrenamiento, limpieza, meses, seleccion, tablaActividades, tablaEstudiantes,
-  tecnologias, variablesCreadas, variablesPorMes,
-} from '@/data/tesis'
+  ArrowRight, BarChart3, Brain, CalendarDays, Check, CheckCircle2, Cog, Copy, Database, FileSpreadsheet, FileX, Filter, Lock,
+  MonitorSmartphone, Rocket, Scissors, Search, Sparkles, Tags, Target, TreeDeciduous, Trees, TrendingUp, Type, X,
+} from 'lucide-react'
+import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts'
+import { Big, Chip, IconTile, Panel, Slide } from '@/components/slide'
+import { useChartStyle } from '@/components/charts'
+import { datos, division, meses, seleccion } from '@/data/tesis'
 
-// ---------------------------------------------------------------- Datos y obtención
+// ---------------------------------------------------------------- Datos
 export function DatosScene() {
-  const tablas = [
-    { titulo: 'Información de los estudiantes', filas: datos.filasRegistro, icon: Users, items: tablaEstudiantes },
-    { titulo: 'Actividades del curso', filas: datos.filasActividades, icon: FileSpreadsheet, items: tablaActividades },
-  ]
   return (
-    <section className="space-y-6">
-      <SceneHeader
-        eyebrow="Metodología · Datos"
-        title="De dónde vienen los datos"
-        intro="Se usaron las notas de los estudiantes de Pensamiento Cuantitativo de 2019 a 2022. Los datos los proporcionó la Ing. Lynette García Pérez y provienen de las bases de datos de la Universidad, de Canvas y de un archivo de Excel con las actividades del curso."
-      />
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Stat label="Periodo" value={datos.periodo} sub="Cuatro años del curso" icon={Database} tone="primary" />
-        <Stat label="Estudiantes" value={datos.filasRegistro.toLocaleString('es-GT')} sub="registros iniciales" icon={Users} />
-        <Stat label="Actividades" value={datos.filasActividades.toLocaleString('es-GT')} sub="registros de tareas, parciales y exámenes" icon={Layers} />
-        <Stat label="Fuentes" value="3" sub="Bases de datos de la UVG, Canvas y un Excel de actividades" icon={FileSpreadsheet} />
+    <Slide eyebrow="Metodología · Datos" title="Cuatro años de notas: 2019 a 2022">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+        <IconTile icon={Database} label="Base de datos UVG" sub="Perfil de cada estudiante" tone="primary" />
+        <IconTile icon={MonitorSmartphone} label="Canvas" sub="Notas y entregas" tone="primary" />
+        <IconTile icon={FileSpreadsheet} label="Excel de actividades" sub="Actividades y puntos por año" tone="primary" />
       </div>
-
-      <div className="grid lg:grid-cols-2 gap-4">
-        {tablas.map((t) => (
-          <Card key={t.titulo}>
-            <CardHead icon={t.icon} title={t.titulo} hint={`${t.filas.toLocaleString('es-GT')} filas`} />
-            <ul className="p-5 pt-3 divide-y divide-border">
-              {t.items.map((i) => (
-                <li key={i.v} className="py-2 first:pt-0 last:pb-0 grid grid-cols-[minmax(0,11rem)_1fr] gap-3 text-xs">
-                  <span className="font-medium text-foreground">{i.v}</span>
-                  <span className="text-muted-foreground">{i.d}</span>
-                </li>
-              ))}
-            </ul>
-          </Card>
-        ))}
-        <Card className="lg:col-span-2">
-          <CardHead icon={FileSpreadsheet} title="Registro de actividades por año" hint="Archivo de Excel" />
-          <div className="p-5 pt-3 grid md:grid-cols-[1fr_1.4fr] gap-4 items-center">
-            <ul className="divide-y divide-border">
-              {[
-                { v: 'Nombre de la actividad', d: 'Cada tarea, parcial y examen del curso.' },
-                { v: 'Puntos posibles', d: 'Lo máximo que se podía obtener.' },
-              ].map((i) => (
-                <li key={i.v} className="py-2 first:pt-0 last:pb-0 grid grid-cols-[minmax(0,11rem)_1fr] gap-3 text-xs">
-                  <span className="font-medium text-foreground">{i.v}</span>
-                  <span className="text-muted-foreground">{i.d}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="text-xs text-muted-foreground leading-relaxed">Lista las actividades que se hicieron en cada año analizado. Sirvió para verificar que las actividades registradas coincidieran con la estructura real del curso y para detectar actividades faltantes.</p>
-          </div>
-        </Card>
+      <div className="grid grid-cols-2 gap-5">
+        <Panel><Big value={datos.filasRegistro.toLocaleString('es-GT')} label="registros de estudiantes" /></Panel>
+        <Panel><Big value={datos.filasActividades.toLocaleString('es-GT')} label="registros de actividades" /></Panel>
       </div>
-
-      <Card tone="good">
-        <div className="p-5 grid md:grid-cols-[auto_1fr] gap-4 items-center">
-          <div className="rounded-md border border-border/60 bg-muted/40 p-3 text-good w-fit"><Lock size={22} aria-hidden="true" /></div>
-          <div className="space-y-1">
-            <p className="eyebrow">Privacidad</p>
-            <p className="text-sm max-w-3xl">El carné se reemplazó por un código anónimo y se eliminaron los nombres. Con estos datos no es posible saber a qué estudiante pertenece cada registro.</p>
-          </div>
-        </div>
-      </Card>
-    </section>
+      <div className="flex items-center gap-3 text-good">
+        <Lock className="h-5 w-5 shrink-0" aria-hidden="true" />
+        <p className="text-base md:text-lg font-medium">Datos anónimos: sin carné ni nombres</p>
+      </div>
+    </Slide>
   )
 }
 
 // ---------------------------------------------------------------- Fases
+const pasos = [
+  { icon: Scissors, t: 'Limpieza' },
+  { icon: Sparkles, t: 'Variables' },
+  { icon: Search, t: 'Exploración' },
+  { icon: Brain, t: 'Modelos' },
+  { icon: Target, t: 'Evaluación' },
+  { icon: Rocket, t: 'Herramienta' },
+]
+
 export function FasesScene() {
   return (
-    <section className="space-y-6">
-      <SceneHeader
-        eyebrow="Metodología · Fases"
-        title="Seis fases de trabajo"
-        intro="El proyecto siguió CRISP-DM, una guía común para proyectos de ciencia de datos que permite regresar a una fase anterior cuando aparece algo nuevo. Las tareas de cada fase se organizaron con un tablero Kanban."
-      />
-
-      <Card tone="primary">
-        <CardHead icon={GitBranch} title="Fases del proyecto" right={<div className="flex gap-1.5"><Badge tone="primary">CRISP-DM</Badge><Badge><KanbanSquare size={10} aria-hidden="true" /> Kanban</Badge></div>} />
-        <ol className="p-5 pt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {fases.map((f) => (
-            <li key={f.n} className="relative rounded-md border border-border bg-card/60 p-4 space-y-1.5">
-              <div className="flex items-center gap-2">
-                <span className="grid h-6 w-6 place-items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold num">{f.n}</span>
-                <p className="text-sm font-semibold">{f.nombre}</p>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">{f.resumen}</p>
-            </li>
-          ))}
-        </ol>
-      </Card>
-
-      <div className="grid md:grid-cols-2 gap-4">
-        <Card>
-          <CardHead icon={GitBranch} title="CRISP-DM" />
-          <p className="p-5 pt-2 text-sm text-muted-foreground leading-relaxed">Ordenó el proyecto en fases enfocadas en los objetivos: analizar los datos, encontrar patrones y desarrollar los modelos.</p>
-        </Card>
-        <Card>
-          <CardHead icon={KanbanSquare} title="Kanban" />
-          <p className="p-5 pt-2 text-sm text-muted-foreground leading-relaxed">Un tablero visual para seguir las tareas de cada fase y sumar trabajo que no estaba planeado al inicio.</p>
-        </Card>
+    <Slide eyebrow="Metodología · Fases" title="Seis fases basadas en CRISP-DM">
+      <ol className="grid grid-cols-3 lg:grid-cols-6 gap-y-8 gap-x-4">
+        {pasos.map((s, i) => (
+          <li key={s.t} className="relative flex flex-col items-center text-center gap-3">
+            <div className="relative grid h-16 w-16 md:h-20 md:w-20 place-items-center rounded-2xl border border-primary/40 bg-primary/10 text-primary">
+              <s.icon className="h-8 w-8" aria-hidden="true" />
+              <span className="absolute -top-2 -left-2 grid h-7 w-7 place-items-center rounded-full bg-primary text-primary-foreground text-sm font-semibold num">{i + 1}</span>
+            </div>
+            <p className="text-base md:text-lg font-semibold">{s.t}</p>
+            {i < pasos.length - 1 && <ArrowRight className="hidden lg:block absolute top-7 md:top-9 -right-4 h-5 w-5 text-muted-foreground" aria-hidden="true" />}
+          </li>
+        ))}
+      </ol>
+      <div className="flex flex-wrap gap-3">
+        <Chip tone="primary" icon={Cog}>CRISP-DM: fases que se pueden repetir</Chip>
+        <Chip icon={CheckCircle2}>Kanban: seguimiento de tareas</Chip>
       </div>
-
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span className="eyebrow mr-1">Herramientas</span>
-        {tecnologias.map((t) => <Badge key={t}>{t}</Badge>)}
-      </div>
-    </section>
+    </Slide>
   )
 }
 
 // ---------------------------------------------------------------- Limpieza
 export function LimpiezaScene() {
-  const { p, tooltip } = useChartStyle()
+  const { p } = useChartStyle()
   const clases = [
     { name: 'Aprobó', value: datos.tasaAprobacion, c: p.primary },
     { name: 'Reprobó', value: datos.tasaReprobacion, c: p.bad },
   ]
+  const checks = [
+    { icon: Type, t: 'Formatos' },
+    { icon: FileX, t: 'Valores imposibles' },
+    { icon: Copy, t: 'Repetidos' },
+    { icon: Filter, t: 'Datos faltantes' },
+    { icon: Tags, t: 'Categorías raras' },
+  ]
   return (
-    <section className="space-y-6">
-      <SceneHeader
-        eyebrow="Fase 1 · Limpieza de datos"
-        title="Información completa y sin errores"
-        intro="Antes de entrenar cualquier modelo se revisó que no hubiera datos faltantes, repetidos ni inconsistentes, y que las actividades registradas coincidieran con la estructura del curso de cada año."
-      />
-
-      <Card>
-        <CardHead icon={Scissors} title="Pasos de la limpieza" />
-        <ol className="p-5 pt-3 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {limpieza.map((l, i) => (
-            <li key={l.paso} className="rounded-md border border-border bg-card/60 p-3 space-y-1">
-              <p className="text-xs font-semibold flex items-center gap-2"><span className="font-mono text-muted-foreground num">{String(i + 1).padStart(2, '0')}</span>{l.paso}</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">{l.detalle}</p>
-            </li>
-          ))}
-        </ol>
-      </Card>
-
-      <div className="grid md:grid-cols-2 gap-4">
-        <Card tone="bad">
-          <CardHead icon={Filter} title="Pocos casos de reprobación" hint="Solo 1 de cada 7 estudiantes reprueba. Eso hace más difícil que un modelo aprenda a reconocerlos, y se tomó en cuenta en todo el proyecto." />
-          <div className="p-5 pt-2 flex items-center gap-4">
-            <div className="h-36 w-36 shrink-0">
-              <ResponsiveContainer>
-                <PieChart>
-                  <Pie data={clases} dataKey="value" innerRadius={42} outerRadius={64} startAngle={90} endAngle={-270} stroke="none">
-                    {clases.map((c) => <Cell key={c.name} fill={c.c} />)}
-                  </Pie>
-                  <Tooltip {...tooltip} formatter={(v: number) => `${v} %`} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="space-y-2">
-              <p className="text-3xl font-semibold num text-bad">{datos.tasaReprobacion} %</p>
-              <p className="text-xs text-muted-foreground">reprobó el curso</p>
-              <Legend items={clases.map((c) => ({ label: `${c.name} ${c.value} %`, color: c.c }))} />
+    <Slide eyebrow="Fase 1 · Limpieza" title="Datos completos y sin errores">
+      <div className="grid md:grid-cols-[1fr_1fr] gap-5 items-stretch">
+        <Panel>
+          <ul className="grid gap-4">
+            {checks.map((c) => (
+              <li key={c.t} className="flex items-center gap-4">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-good/40 bg-good/10 text-good"><c.icon className="h-5 w-5" aria-hidden="true" /></span>
+                <span className="text-lg md:text-xl font-medium">{c.t}</span>
+                <Check className="ml-auto h-5 w-5 text-good" aria-label="revisado" />
+              </li>
+            ))}
+          </ul>
+        </Panel>
+        <Panel className="flex flex-col items-center justify-center gap-4">
+          <div className="relative h-48 w-48">
+            <ResponsiveContainer>
+              <PieChart>
+                <Pie data={clases} dataKey="value" innerRadius={62} outerRadius={92} startAngle={90} endAngle={-270} stroke="none" isAnimationActive={false}>
+                  {clases.map((c) => <Cell key={c.name} fill={c.c} />)}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="absolute inset-0 grid place-items-center">
+              <p className="text-4xl font-semibold num text-bad">13.5 %</p>
             </div>
           </div>
-        </Card>
-        <Card tone="primary">
-          <CardHead icon={ShieldCheck} title="Resultado de la limpieza" hint="Los registros sin información suficiente se dejaron fuera para no rellenar demasiados datos a ciegas." />
-          <div className="p-5 pt-3 space-y-3">
-            <ul className="space-y-2 text-sm">
-              {excluidos.map((e) => (
-                <li key={e.motivo} className="flex justify-between gap-3">
-                  <span className="text-muted-foreground">{e.motivo}</span>
-                  <span className="font-mono num">−{e.n}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="flex items-baseline justify-between gap-3 border-t border-border pt-3">
-              <span className="text-sm font-medium">Estudiantes analizados</span>
-              <span className="text-2xl font-semibold num text-primary">{datos.estudiantesFinal.toLocaleString('es-GT')}</span>
-            </div>
-          </div>
-        </Card>
+          <p className="text-lg md:text-xl font-semibold text-center">Solo 1 de cada 7 reprueba</p>
+        </Panel>
       </div>
-    </section>
+      <Panel className="flex flex-wrap items-baseline justify-between gap-3">
+        <p className="text-lg md:text-xl text-muted-foreground">Resultado</p>
+        <p className="text-3xl md:text-4xl font-semibold num text-primary">{datos.estudiantesFinal.toLocaleString('es-GT')} <span className="text-lg md:text-xl text-foreground font-medium">estudiantes</span></p>
+      </Panel>
+    </Slide>
   )
 }
 
-// ---------------------------------------------------------------- Creación de variables
-export function CaracteristicasScene() {
-  const grupos = [...new Set(variablesCreadas.map((v) => v.grupo))]
-  return (
-    <section className="space-y-6">
-      <SceneHeader
-        eyebrow="Fase 2 · Creación de variables"
-        title="De las calificaciones a señales de riesgo"
-        intro="A partir de las notas y fechas de cada actividad se crearon nuevos indicadores. Se basaron en investigaciones previas y en experiencia con problemas parecidos, como la detección de fraude."
-      />
+// ---------------------------------------------------------------- Variables
+const gruposVis = [
+  { icon: TrendingUp, t: 'Rendimiento', tone: 'primary' as const, items: ['% acumulado', 'Nota de parciales', 'Cambio mensual', 'Vs. la sección'] },
+  { icon: MonitorSmartphone, t: 'Canvas', tone: 'accent' as const, items: ['Entregas tardías', 'Comentarios', 'Días para calificar'] },
+  { icon: CalendarDays, t: 'Contexto', tone: 'neutral' as const, items: ['Virtual o presencial'] },
+]
 
-      <div className="grid lg:grid-cols-3 gap-4 items-start">
-        {grupos.map((g, gi) => (
-          <Card key={g} tone={gi === 0 ? 'primary' : 'neutral'}>
-            <CardHead icon={Sparkles} title={g} />
-            <ul className="p-5 pt-3 divide-y divide-border">
-              {variablesCreadas.filter((v) => v.grupo === g).map((v) => (
-                <li key={v.v} className="py-2.5 first:pt-0 last:pb-0 space-y-0.5">
-                  <p className="text-sm font-medium">{v.v}</p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{v.d}</p>
-                </li>
-              ))}
-            </ul>
-          </Card>
+export function CaracteristicasScene() {
+  return (
+    <Slide eyebrow="Fase 2 · Variables" title="De las calificaciones a señales de riesgo">
+      <div className="grid md:grid-cols-3 gap-5">
+        {gruposVis.map((g) => (
+          <Panel key={g.t} className="space-y-5">
+            <IconTile icon={g.icon} label={g.t} tone={g.tone} />
+            <div className="flex flex-wrap justify-center gap-2">
+              {g.items.map((i) => <Chip key={i}>{i}</Chip>)}
+            </div>
+          </Panel>
         ))}
       </div>
-
-      <Card>
-        <div className="p-5 grid sm:grid-cols-3 gap-4">
-          <div>
-            <p className="eyebrow">Resultado</p>
-            <p className="mt-1 text-2xl font-semibold num">{datos.variablesConstruidas} variables</p>
-            <p className="text-xs text-muted-foreground">Una fila por estudiante y semestre</p>
-          </div>
-          <div className="sm:col-span-2 text-sm text-muted-foreground leading-relaxed self-center">
-            Las variables de cada mes se calcularon con la información disponible al cierre de ese mes. En 2019 las tareas se entregaban en papel, así que las fechas de entrega y calificación de ese año se completaron con valores típicos.
-          </div>
-        </div>
-      </Card>
-    </section>
+      <p className="text-xl md:text-2xl font-semibold"><span className="text-primary num">40</span> variables por estudiante</p>
+    </Slide>
   )
 }
 
-// ---------------------------------------------------------------- Análisis exploratorio
+// ---------------------------------------------------------------- Exploratorio
+const cortos: Record<string, string> = {
+  'Porcentaje acumulado en actividades': '% acumulado',
+  'Notas en los parciales': 'Parciales',
+  'Número de intento': 'Número de intento',
+  'Puntaje en la PAA': 'PAA',
+  'Colegio': 'Colegio',
+  'Título de nivel medio': 'Título',
+  'Comparación con la sección': 'Vs. la sección',
+  'Cambio de un mes a otro': 'Cambio mensual',
+  'Entregas tardías': 'Entregas tardías',
+  'Cantidad de comentarios': 'Comentarios',
+  'Días para calificar': 'Días para calificar',
+  'Modalidad y año': 'Modalidad y año',
+  'Género': 'Género',
+}
+
 export function ExploratorioScene() {
   return (
-    <section className="space-y-6">
-      <SceneHeader
-        eyebrow="Fase 3 · Análisis exploratorio"
-        title="Elegir los datos que realmente ayudan"
-        intro="Con el 70 % de los datos (los mismos que luego usarían los modelos para aprender) se comparó a quienes aprobaron con quienes reprobaron. Se conservaron solo las variables que mostraban una diferencia clara entre ambos grupos."
-      />
-
-      <div className="grid md:grid-cols-3 gap-4">
-        {[
-          { t: '¿Son diferentes los grupos?', d: 'Se comparó cada variable entre aprobados y reprobados para ver si sus valores eran distintos.' },
-          { t: '¿Se relaciona con el resultado?', d: 'Se midió qué tanto se relaciona cada variable con aprobar y con la nota final.' },
-          { t: '¿Repite información?', d: 'Si dos variables decían casi lo mismo, se quedó la más fácil de interpretar.' },
-        ].map((c) => (
-          <Card key={c.t}>
-            <div className="p-5 space-y-1">
-              <p className="text-sm font-semibold">{c.t}</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">{c.d}</p>
+    <Slide eyebrow="Fase 3 · Análisis exploratorio" title="Solo lo que distingue a quienes reprueban">
+      <div className="grid md:grid-cols-2 gap-5">
+        {[true, false].map((sel) => (
+          <Panel key={String(sel)} className="space-y-5">
+            <div className={`flex items-center gap-3 ${sel ? 'text-good' : 'text-bad'}`}>
+              {sel ? <Check className="h-7 w-7" aria-hidden="true" /> : <X className="h-7 w-7" aria-hidden="true" />}
+              <p className="text-2xl font-semibold">{sel ? 'Se usaron' : 'Se descartaron'}</p>
             </div>
-          </Card>
+            <div className="flex flex-wrap gap-2.5">
+              {seleccion.filter((s) => s.decision === sel).map((s) => (
+                <Chip key={s.variable} tone={sel ? 'good' : 'bad'}>{cortos[s.variable] ?? s.variable}</Chip>
+              ))}
+            </div>
+          </Panel>
         ))}
       </div>
-
-      <Card>
-        <CardHead icon={Filter} title="Qué se usó y qué se descartó" />
-        <div className="p-5 pt-3 grid lg:grid-cols-2 gap-x-6">
-          {[true, false].map((sel) => (
-            <div key={String(sel)} className="min-w-0">
-              <p className="eyebrow py-2 flex items-center gap-2">
-                {sel ? <Badge tone="good">Se usaron · 6</Badge> : <Badge tone="bad">Se descartaron · 7</Badge>}
-              </p>
-              <ul className="divide-y divide-border">
-                {seleccion.filter((s) => s.decision === sel).map((s) => (
-                  <li key={s.variable} className="py-2 flex gap-2.5">
-                    {sel ? <Check size={14} className="mt-0.5 shrink-0 text-good" aria-hidden="true" /> : <X size={14} className="mt-0.5 shrink-0 text-bad" aria-hidden="true" />}
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium">{s.variable}</p>
-                      <p className="text-xs text-muted-foreground">{s.motivo}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </Card>
-    </section>
+    </Slide>
   )
 }
 
-// ---------------------------------------------------------------- Flujo de entrenamiento
+// ---------------------------------------------------------------- Modelos
+const algos = [
+  { icon: TreeDeciduous, t: 'Árbol de decisión' },
+  { icon: Trees, t: 'Random Forest' },
+  { icon: Trees, t: 'XGBoost' },
+  { icon: Trees, t: 'LightGBM' },
+  { icon: TrendingUp, t: 'Regresión logística / lineal' },
+]
+
+export function ModelosScene() {
+  return (
+    <Slide eyebrow="Fase 4 · Modelos" title="Un modelo para cada mes del semestre">
+      <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-center">
+        <Big value="5" label="algoritmos" tone="primary" />
+        <span className="text-3xl md:text-5xl text-muted-foreground">×</span>
+        <Big value="4" label="meses" tone="primary" />
+        <span className="text-3xl md:text-5xl text-muted-foreground">×</span>
+        <Big value="2" label="enfoques" tone="primary" />
+        <span className="text-3xl md:text-5xl text-muted-foreground">=</span>
+        <Big value="40" label="modelos" tone="accent" />
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-5">
+        <Panel className="space-y-2">
+          <p className="eyebrow">Clasificación</p>
+          <p className="text-2xl font-semibold">¿Aprueba o reprueba?</p>
+          <p className="text-base text-muted-foreground">Objetivo: <span className="text-foreground font-medium">Aprobado</span> · sí / no</p>
+        </Panel>
+        <Panel className="space-y-2">
+          <p className="eyebrow">Regresión</p>
+          <p className="text-2xl font-semibold">¿Qué nota sacará?</p>
+          <p className="text-base text-muted-foreground">Objetivo: <span className="text-foreground font-medium">Nota final</span> · 0 a 100</p>
+        </Panel>
+      </div>
+
+      <div className="grid grid-cols-4 gap-2">
+        {meses.map((m, i) => (
+          <div key={m} className="rounded-lg border border-border bg-card p-3 text-center">
+            <p className="text-lg md:text-xl font-semibold">{m}</p>
+            <p className="mt-1 text-xs md:text-sm text-muted-foreground">{i === 0 ? 'Perfil + tareas' : '+ parciales'}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-wrap gap-2.5">
+        {algos.map((a) => <Chip key={a.t} icon={a.icon} tone={a.t === 'Random Forest' ? 'primary' : 'neutral'}>{a.t}</Chip>)}
+      </div>
+    </Slide>
+  )
+}
+
+// ---------------------------------------------------------------- Entrenamiento
+const flujo = [
+  { icon: Scissors, t: 'Separar' },
+  { icon: Cog, t: 'Ajustar', sub: '1,000 pruebas' },
+  { icon: Brain, t: 'Entrenar' },
+  { icon: Target, t: 'Definir el riesgo' },
+  { icon: BarChart3, t: 'Evaluar', sub: 'Datos nuevos' },
+]
+
 export function EntrenamientoScene() {
   const { p } = useChartStyle()
   const colors = [p.primary, p['chart-2'], p['chart-3']]
+  const nombres = ['Aprender', 'Ajustar', 'Evaluar']
   return (
-    <section className="space-y-6">
-      <SceneHeader
-        eyebrow="Fases 4 y 5 · Entrenamiento"
-        title="Cómo se entrenaron los modelos"
-        intro="Se entrenaron 40 modelos: cinco algoritmos, uno para cada mes de enero a abril y con dos enfoques. El primero predice si el estudiante aprueba o reprueba; el segundo estima su nota final."
-      />
-
-      <div className="grid md:grid-cols-2 gap-4">
-        {[
-          { t: 'Clasificación', q: '¿Aprueba o reprueba?', obj: 'Aprobado', tipo: 'Binaria', d: 'Vale 1 si el estudiante aprobó y 0 si reprobó. El modelo da la probabilidad de reprobar y se enfoca en encontrar a quienes reprueban.' },
-          { t: 'Regresión', q: '¿Qué nota sacará?', obj: 'Nota final', tipo: 'Numérica, de 0 a 100', d: 'El modelo estima la nota con la que el estudiante terminará el curso. Se aprueba con 61.' },
-        ].map((e) => (
-          <Card key={e.t} tone="accent">
-            <CardHead icon={Target} title={`${e.t} · ${e.q}`} />
-            <div className="p-5 pt-3 space-y-3">
-              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <span className="eyebrow">Variable objetivo</span>
-                <span className="text-lg font-semibold">{e.obj}</span>
-                <Badge>{e.tipo}</Badge>
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">{e.d}</p>
-            </div>
-          </Card>
+    <Slide eyebrow="Fases 4 y 5 · Entrenamiento" title="Detectar a todos, sin llenar de falsas alarmas">
+      <ol className="flex flex-wrap items-start justify-center gap-4 md:gap-6">
+        {flujo.map((f, i) => (
+          <li key={f.t} className="flex items-start gap-4 md:gap-6">
+            <IconTile icon={f.icon} label={f.t} sub={f.sub} tone="primary" />
+            {i < flujo.length - 1 && <ArrowRight className="mt-6 md:mt-7 h-6 w-6 text-muted-foreground hidden sm:block" aria-hidden="true" />}
+          </li>
         ))}
-      </div>
+      </ol>
 
-      <Card tone="primary">
-        <CardHead icon={Workflow} title="Flujo de entrenamiento" hint="El mismo proceso se repitió para cada algoritmo y cada mes." />
-        <ol className="p-5 pt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {flujoEntrenamiento.map((f, i) => (
-            <li key={f.t} className="relative rounded-md border border-border bg-card/60 p-4 space-y-1.5">
-              <div className="flex items-center gap-2">
-                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold num">{i + 1}</span>
-                <p className="text-sm font-semibold">{f.t}</p>
-                {i < flujoEntrenamiento.length - 1 && <ArrowRight size={14} className="ml-auto shrink-0 text-muted-foreground" aria-hidden="true" />}
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">{f.d}</p>
-            </li>
+      <Panel className="space-y-4">
+        <div className="flex h-14 overflow-hidden rounded-lg">
+          {division.map((d, i) => (
+            <div key={d.conjunto} className="grid place-items-center text-base md:text-lg font-semibold" style={{ width: `${d.pct}%`, background: colors[i], color: p.card }}>
+              {d.pct} %
+            </div>
           ))}
-        </ol>
-      </Card>
-
-      <div className="grid lg:grid-cols-2 gap-4">
-        <Card>
-          <CardHead icon={Brain} title="Algoritmos utilizados" />
-          <ul className="p-5 pt-3 divide-y divide-border">
-            {algoritmos.map((a) => (
-              <li key={a.t} className="py-2.5 first:pt-0 last:pb-0">
-                <p className="text-sm font-medium">{a.t}</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">{a.d}</p>
-              </li>
-            ))}
-          </ul>
-        </Card>
-
-        <Card>
-          <CardHead icon={Layers} title="Un modelo para cada mes" hint="Cada modelo usa solo lo que se sabe hasta ese mes, igual que pasaría en la vida real. Mayo no se incluyó porque ya contiene la nota final." />
-          <div className="p-5 pt-3 overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="text-muted-foreground">
-                  <th className="text-left font-medium py-1.5 pr-3">Información</th>
-                  {meses.map((m) => <th key={m} className="font-medium py-1.5 px-2 text-center">{m.slice(0, 3)}</th>)}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {variablesPorMes.map((v) => (
-                  <tr key={v.variable}>
-                    <td className="py-2 pr-3">{v.variable}</td>
-                    {v.meses.map((on, i) => (
-                      <td key={i} className="py-2 px-2 text-center">
-                        {on ? <Check size={14} className="inline text-good" aria-label="usada" /> : <span className="text-muted-foreground" aria-label="no usada">–</span>}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHead title="Cómo se repartieron los datos" />
-        <div className="p-5 pt-4 grid md:grid-cols-[1.2fr_1fr] gap-5 items-center">
-          <div className="flex h-9 overflow-hidden rounded-md">
-            {division.map((d, i) => (
-              <div key={d.conjunto} className="grid place-items-center text-xs font-semibold" style={{ width: `${d.pct}%`, background: colors[i], color: p.card }}>
-                {d.pct} %
-              </div>
-            ))}
-          </div>
-          <ul className="space-y-2">
-            {division.map((d, i) => (
-              <li key={d.conjunto} className="flex gap-2 text-xs">
-                <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-sm" style={{ background: colors[i] }} aria-hidden="true" />
-                <span><strong className="font-semibold">{d.conjunto}.</strong> <span className="text-muted-foreground">{d.uso}</span></span>
-              </li>
-            ))}
-          </ul>
         </div>
-      </Card>
-    </section>
+        <div className="flex">
+          {division.map((d, i) => (
+            <p key={d.conjunto} className="text-sm md:text-base font-medium text-center" style={{ width: `${d.pct}%` }}>{nombres[i]}</p>
+          ))}
+        </div>
+      </Panel>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <Chip tone="good" icon={Check}>Más peso a detectar</Chip>
+        <span className="text-muted-foreground">+</span>
+        <Chip tone="warn" icon={Filter}>Controlar falsas alarmas</Chip>
+      </div>
+    </Slide>
   )
 }
