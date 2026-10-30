@@ -1,13 +1,13 @@
-import { AlertTriangle, BookOpen, CalendarClock, GraduationCap, Layers, Scale, Target, TrendingDown, Users } from 'lucide-react'
+import { AlertTriangle, BookOpen, CalendarClock, GraduationCap, Scale, TrendingDown } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { Badge, Card, CardHead, SceneHeader, Stat } from '@/components/ui'
 import { useChartStyle } from '@/components/charts'
-import { datos, proyecto } from '@/data/tesis'
+import { proyecto } from '@/data/tesis'
 
 export function InicioScene() {
   return (
-    <section className="space-y-6">
-      <header className="space-y-3">
+    <section className="min-h-[60vh] flex flex-col justify-center gap-8">
+      <header className="space-y-4">
         <div className="flex flex-wrap gap-1.5">
           <Badge tone="primary">Trabajo de graduación</Badge>
           <Badge>{proyecto.universidad}</Badge>
@@ -15,46 +15,16 @@ export function InicioScene() {
         <h2 className="text-3xl md:text-5xl font-semibold tracking-tight max-w-4xl leading-[1.08]">{proyecto.titulo}</h2>
         <p className="text-sm md:text-base text-muted-foreground max-w-2xl">{proyecto.subtitulo}</p>
       </header>
-
-      <Card tone="primary">
-        <div className="p-6 flex flex-col md:flex-row md:items-stretch gap-6 md:divide-x md:divide-border">
-          <div className="md:w-2/5 space-y-1">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Target size={14} aria-hidden="true" />
-              <p className="eyebrow">Resultado principal</p>
-            </div>
-            <p className="text-5xl md:text-6xl font-semibold tracking-tight num text-primary">89.6 %</p>
-            <p className="text-sm text-muted-foreground max-w-xs">de los estudiantes que reprobaron fueron detectados desde <strong className="text-foreground">enero</strong>, el primer mes del semestre.</p>
-          </div>
-          <div className="flex-1 md:pl-6 grid grid-cols-2 gap-4 content-center">
-            <div>
-              <p className="eyebrow">Modelo elegido</p>
-              <p className="mt-1 text-xl font-semibold">Random Forest</p>
-              <p className="text-xs text-muted-foreground">Uno para cada mes</p>
-            </div>
-            <div>
-              <p className="eyebrow">En abril</p>
-              <p className="mt-1 text-xl font-semibold num">100 %</p>
-              <p className="text-xs text-muted-foreground">de los casos detectados, con muy pocas falsas alarmas</p>
-            </div>
-            <div>
-              <p className="eyebrow">Autor</p>
-              <p className="mt-1 text-sm font-medium">{proyecto.autor}</p>
-            </div>
-            <div>
-              <p className="eyebrow">Asesora</p>
-              <p className="mt-1 text-sm font-medium">{proyecto.asesora}</p>
-            </div>
-          </div>
+      <dl className="flex flex-wrap gap-x-12 gap-y-4 border-t border-border pt-6">
+        <div>
+          <dt className="eyebrow">Autor</dt>
+          <dd className="mt-1 text-base font-medium">{proyecto.autor}</dd>
         </div>
-      </Card>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Stat label="Estudiantes analizados" value={datos.estudiantesFinal.toLocaleString('es-GT')} sub={`Pensamiento Cuantitativo, ${datos.periodo}`} icon={Users} />
-        <Stat label="Reprobaron" value={`${datos.tasaReprobacion} %`} sub="Aproximadamente 1 de cada 7" icon={TrendingDown} tone="warn" />
-        <Stat label="Modelos entrenados" value="40" sub="Para comparar y elegir el mejor" icon={Layers} />
-        <Stat label="Calificaciones revisadas" value={datos.filasActividades.toLocaleString('es-GT')} sub="Tareas, parciales y entregas en Canvas" icon={BookOpen} />
-      </div>
+        <div>
+          <dt className="eyebrow">Asesora</dt>
+          <dd className="mt-1 text-base font-medium">{proyecto.asesora}</dd>
+        </div>
+      </dl>
     </section>
   )
 }
