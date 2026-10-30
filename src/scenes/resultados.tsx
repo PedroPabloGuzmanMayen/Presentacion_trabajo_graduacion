@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { ArrowRight, User } from 'lucide-react'
-import { Bar, BarChart, CartesianGrid, Cell, LabelList, Line, LineChart, ReferenceArea, ReferenceLine, ResponsiveContainer, XAxis, YAxis } from 'recharts'
+import { ArrowRight, BellRing, Check, User } from 'lucide-react'
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, Line, LineChart, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import clsx from 'clsx'
 import { Segmented } from '@/components/ui'
 import { Big, Panel, Slide } from '@/components/slide'
 import { Legend, useChartStyle } from '@/components/charts'
-import { clasificacion, importanciaClf, meses, promediosClf, regresion, reprobacionPorIntento, reprobadosPrueba, type Mes } from '@/data/tesis'
+import { modelColor } from '@/lib/theme'
+import { clasificacion, importanciaClf, meses, modelos, promediosClf, regresion, reprobacionPorIntento, reprobadosPrueba, type Mes } from '@/data/tesis'
 
 const mesCorto = (m: string) => m.slice(0, 3)
 
@@ -95,34 +96,84 @@ export function ClasificacionScene() {
 }
 
 // ---------------------------------------------------------------- Comparación de modelos
+type Vista = 'detectados' | 'alarmas'
+
 export function ComparacionScene() {
-  const { p } = useChartStyle()
+  const { p, axis, grid, tooltip } = useChartStyle()
+  const [vista, setVista] = useState<Vista>('detectados')
+  const det = vista === 'detectados'
+  const data = meses.map((mes) => {
+    const row: Record<string, number | string> = { mes }
+    for (const m of modelos) {
+      const r = clasificacion.find((c) => c.modelo === m && c.mes === mes)!
+      row[m] = +((det ? r.sens : 1 - r.prec) * 100).toFixed(1)
+    }
+    return row
+  })
+  const rf = promediosClf.find((m) => m.modelo === 'Random Forest')!
+  const color = (i: number) => modelColor(p, i)
+  const opciones: Array<{ id: Vista; label: string; icon: typeof Check; tone: string }> = [
+    { id: 'detectados', label: 'Casos reales detectados', icon: Check, tone: 'border-good/60 bg-good/15 text-good' },
+    { id: 'alarmas', label: 'Falsas alarmas', icon: BellRing, tone: 'border-warn/60 bg-warn/15 text-warn' },
+  ]
+
   return (
     <Slide eyebrow="Resultados · Comparación" title="Random Forest: el mejor equilibrio">
-      <Panel>
-        <div className="grid grid-cols-[minmax(0,9rem)_1fr_1fr] md:grid-cols-[minmax(0,12rem)_1fr_1fr] gap-x-4 gap-y-4 items-center">
-          <span />
-          <p className="text-sm md:text-base font-semibold text-good">Casos detectados</p>
-          <p className="text-sm md:text-base font-semibold text-warn">Falsas alarmas</p>
-          {promediosClf.map((m) => {
-            const best = m.modelo === 'Random Forest'
-            return (
-              <div key={m.modelo} className="contents">
-                <p className={clsx('text-sm md:text-lg', best ? 'font-semibold text-primary' : 'text-muted-foreground')}>{m.modelo}</p>
-                <div className="flex items-center gap-2">
-                  <div className="h-6 md:h-7 rounded" style={{ width: `${m.sens * 80}%`, background: p.good, opacity: best ? 1 : 0.45 }} />
-                  <span className={clsx('text-sm md:text-base num', best && 'font-semibold')}>{(m.sens * 100).toFixed(0)} %</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-6 md:h-7 rounded" style={{ width: `${(1 - m.prec) * 80 * 2.5}%`, background: p.warn, opacity: best ? 1 : 0.45 }} />
-                  <span className={clsx('text-sm md:text-base num', best && 'font-semibold')}>{((1 - m.prec) * 100).toFixed(0)} %</span>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </Panel>
-      <p className="text-lg md:text-xl text-muted-foreground">Promedio de enero a abril. Detecta casi todos, con pocas falsas alarmas.</p>
+      <div role="radiogroup" aria-label="Qué comparar" className="flex flex-wrap gap-3">
+        {opciones.map((o) => (
+          <button
+            key={o.id}
+            type="button"
+            role="radio"
+            aria-checked={vista === o.id}
+            onClick={() => setVista(o.id)}
+            className={clsx(
+              'flex items-center gap-2.5 rounded-full border-2 px-5 py-2.5 text-base md:text-lg font-semibold transition-colors',
+              vista === o.id ? o.tone : 'border-border text-muted-foreground hover:text-foreground hover:bg-muted',
+            )}
+          >
+            <o.icon className="h-5 w-5" aria-hidden="true" />{o.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid lg:grid-cols-[1fr_15rem] gap-5">
+        <Panel>
+          <p className="text-base md:text-lg font-semibold">{det ? 'Porcentaje de reprobados que el modelo detectó' : 'Porcentaje de alertas que eran estudiantes que aprobaron'}</p>
+          <p className="text-sm text-muted-foreground">{det ? 'Más alto es mejor' : 'Más bajo es mejor'}</p>
+          <div className="h-80 mt-3">
+            <ResponsiveContainer>
+              <BarChart data={data} margin={{ top: 28, right: 8, left: -14 }} barCategoryGap="22%" barGap={3}>
+                <CartesianGrid {...grid} />
+                <XAxis dataKey="mes" {...axis} tick={{ ...axis.tick, fontSize: 15, fontWeight: 600 }} />
+                <YAxis domain={det ? [60, 100] : [0, 40]} ticks={det ? [60, 70, 80, 90, 100] : [0, 10, 20, 30, 40]} allowDataOverflow unit=" %" {...axis} tick={{ ...axis.tick, fontSize: 12 }} />
+                <Tooltip {...tooltip} formatter={(v: number, n: string) => [`${v.toFixed(1)} %`, n]} />
+                {modelos.map((m, i) => (
+                  <Bar key={m} dataKey={m} fill={color(i)} fillOpacity={i === 0 ? 1 : 0.38} radius={[4, 4, 0, 0]} animationDuration={500}>
+                    {i === 0 && (
+                      <LabelList dataKey={m} position="top" formatter={(v: number) => `${Math.round(v)}%`} style={{ fill: p.foreground, fontSize: 14, fontWeight: 700 }} />
+                    )}
+                  </Bar>
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="mt-3">
+            <Legend className="text-sm md:text-base" items={modelos.map((m, i) => ({ label: m, color: i === 0 ? color(i) : `color-mix(in srgb, ${color(i)} 45%, transparent)`, strong: i === 0 }))} />
+          </div>
+        </Panel>
+
+        <Panel className="flex flex-col justify-center gap-6">
+          <Big
+            value={`${Math.round((det ? rf.sens : 1 - rf.prec) * 100)} %`}
+            label="promedio de Random Forest"
+            tone={det ? 'good' : 'warn'}
+          />
+          <p className="text-base md:text-lg font-medium leading-snug">
+            {det ? 'Detecta casi todos los casos, todos los meses.' : 'De las más bajas, y casi nulas en abril.'}
+          </p>
+        </Panel>
+      </div>
     </Slide>
   )
 }
