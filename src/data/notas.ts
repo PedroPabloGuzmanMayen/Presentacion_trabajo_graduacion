@@ -77,7 +77,8 @@ export const notas: Record<string, string[]> = {
     'Por eso se descartó como modelo principal, pero sugiero usarla como complemento: alguien marcado sin riesgo pero con nota estimada baja merece seguimiento.',
   ],
   importancia: [
-    'Promedio de los cinco modelos de clasificación: todos siguen el mismo patrón.',
+    'Arranca en el promedio de los cinco modelos: todos siguen el mismo patrón. Con los botones se puede ver cada modelo y el enfoque de nota.',
+    'A la derecha, el peso de cada variable en el mes elegido.',
     'En los primeros meses el modelo le da más importancia al número de intento que al porcentaje acumulado.',
     'Con el paso de los meses importan más las notas de los parciales y el porcentaje acumulado.',
     'El número de intento tiene gran capacidad predictiva en los primeros meses.',

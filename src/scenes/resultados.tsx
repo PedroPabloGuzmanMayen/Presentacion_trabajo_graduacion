@@ -6,7 +6,7 @@ import { Segmented } from '@/components/ui'
 import { Big, Panel, Slide } from '@/components/slide'
 import { Legend, useChartStyle } from '@/components/charts'
 import { modelColor } from '@/lib/theme'
-import { clasificacion, importanciaClf, meses, modelos, modelosReg, promediosClf, promediosReg, regresion, reprobacionPorIntento, reprobadosPrueba, type Mes } from '@/data/tesis'
+import { clasificacion, importanciaClf, importanciaReg, meses, modelos, modelosReg, promediosClf, promediosReg, regresion, reprobacionPorIntento, reprobadosPrueba, variablesImp, type Mes } from '@/data/tesis'
 
 const mesCorto = (m: string) => m.slice(0, 3)
 
@@ -277,15 +277,30 @@ export function RegresionScene() {
 }
 
 // ---------------------------------------------------------------- Importancia
+type Enfoque = '¿Aprueba o reprueba?' | '¿Qué nota sacará?'
+const enfoques: readonly Enfoque[] = ['¿Aprueba o reprueba?', '¿Qué nota sacará?']
+
+// Promedio de varios modelos (cada uno ya está normalizado por mes).
+function promedio(lista: number[][][]) {
+  return meses.map((_, mi) => lista[0][mi].map((_, vi) => lista.reduce((acc, mod) => acc + mod[mi][vi], 0) / lista.length))
+}
+
 export function ImportanciaScene() {
-  const { p, axis, grid } = useChartStyle()
-  // Promedio de los cinco modelos de clasificación (cada uno ya está normalizado).
-  const lista = Object.values(importanciaClf)
-  const m = meses.map((_, mi) => lista[0][mi].map((_, vi) => lista.reduce((acc, mod) => acc + mod[mi][vi], 0) / lista.length))
-  const trend = meses.map((mes, i) => ({
-    mes: mesCorto(mes),
-    intento: m[i][0],
-    acumulado: m[i][1],
+  const { p, axis, grid, tooltip } = useChartStyle()
+  const [enfoque, setEnfoque] = useState<Enfoque>('¿Aprueba o reprueba?')
+  const [modelo, setModelo] = useState('Promedio')
+  const [mes, setMes] = useState<Mes>('Enero')
+  const clf = enfoque === '¿Aprueba o reprueba?'
+  const fuente = clf ? importanciaClf : importanciaReg
+  const opciones = ['Promedio', ...(clf ? modelos : modelosReg)]
+  const sel = opciones.includes(modelo) ? modelo : 'Promedio'
+  const m = sel === 'Promedio' ? promedio(Object.values(fuente)) : fuente[sel]
+  const mi = meses.indexOf(mes)
+
+  const trend = meses.map((ms, i) => ({
+    mes: mesCorto(ms),
+    intento: +m[i][0].toFixed(2),
+    acumulado: +m[i][1].toFixed(2),
     examenes: +(m[i][2] + m[i][3]).toFixed(2),
     perfil: +(m[i][4] + m[i][5] + m[i][6]).toFixed(2),
   }))
@@ -295,22 +310,59 @@ export function ImportanciaScene() {
     { k: 'examenes', label: 'Parciales', c: p['chart-2'] },
     { k: 'perfil', label: 'PAA, colegio y título', c: p['chart-5'] },
   ]
+  // Color de cada variable según su grupo, igual que en la gráfica de líneas.
+  const colorVar = [p.bad, p.primary, p['chart-2'], p['chart-2'], p['chart-5'], p['chart-5'], p['chart-5']]
+  const noDisponible = (vi: number) => (mi === 0 && (vi === 2 || vi === 3)) || (mi === 1 && vi === 3)
+  const etiqueta = sel === 'Promedio' ? 'promedio de los cinco modelos' : sel
+
   return (
     <Slide eyebrow="Resultados · ¿En qué se fija?" title="Al inicio pesa el historial; después, el rendimiento">
-      <Panel>
-        <p className="text-base text-muted-foreground">Importancia de cada dato, promedio de los cinco modelos</p>
-        <div className="h-80 mt-2">
-          <ResponsiveContainer>
-            <LineChart data={trend} margin={{ right: 24, left: -12, top: 12 }}>
-              <CartesianGrid {...grid} />
-              <XAxis dataKey="mes" {...axis} tick={{ ...axis.tick, fontSize: 14 }} />
-              <YAxis domain={[0, 0.7]} ticks={[0, 0.2, 0.4, 0.6]} {...axis} />
-              {series.map((s) => <Line key={s.k} dataKey={s.k} stroke={s.c} strokeWidth={s.k === 'perfil' ? 2.5 : 4} dot={{ r: 5, fill: s.c }} isAnimationActive={false} />)}
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="mt-3"><Legend className="text-sm md:text-base" items={series.map((s) => ({ label: s.label, color: s.c }))} /></div>
-      </Panel>
+      <div className="flex flex-wrap items-center gap-3">
+        <Segmented label="Enfoque" value={enfoque} options={enfoques} onChange={setEnfoque} />
+        <Segmented label="Modelo" value={sel} options={opciones} onChange={setModelo} />
+      </div>
+
+      <div className="grid lg:grid-cols-[1.35fr_1fr] gap-5">
+        <Panel>
+          <p className="text-base font-semibold">A lo largo del semestre</p>
+          <p className="text-sm text-muted-foreground">Importancia agrupada · {etiqueta}</p>
+          <div className="h-64 mt-2">
+            <ResponsiveContainer>
+              <LineChart data={trend} margin={{ right: 20, left: -14, top: 12 }}>
+                <CartesianGrid {...grid} />
+                <XAxis dataKey="mes" {...axis} tick={{ ...axis.tick, fontSize: 14 }} />
+                <YAxis domain={[0, 1]} ticks={[0, 0.25, 0.5, 0.75, 1]} {...axis} />
+                <Tooltip {...tooltip} formatter={(v: number, n: string) => [v.toFixed(2), series.find((x) => x.k === n)?.label ?? n]} />
+                {series.map((x) => <Line key={x.k} dataKey={x.k} stroke={x.c} strokeWidth={x.k === 'perfil' ? 2.5 : 4} dot={{ r: 5, fill: x.c }} animationDuration={400} />)}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="mt-3"><Legend className="text-sm md:text-base" items={series.map((x) => ({ label: x.label, color: x.c }))} /></div>
+        </Panel>
+
+        <Panel className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-base font-semibold">Cada variable</p>
+            <Segmented label="Mes" value={mes} options={meses} onChange={setMes} />
+          </div>
+          <ul className="space-y-2.5">
+            {variablesImp.map((v, vi) => {
+              const val = m[mi][vi]
+              const na = noDisponible(vi)
+              return (
+                <li key={v} className="grid grid-cols-[minmax(0,9.5rem)_1fr_2.75rem] items-center gap-3">
+                  <span className="text-sm truncate" title={v}>{v === '% acumulado en actividades' ? '% acumulado' : v}</span>
+                  <div className="h-5 rounded bg-muted/60">
+                    {!na && <div className="h-5 rounded transition-[width] duration-500" style={{ width: `${Math.max(val * 100, val > 0 ? 1.5 : 0)}%`, background: colorVar[vi] }} />}
+                  </div>
+                  <span className="text-sm text-right font-mono num">{na ? '–' : val.toFixed(2)}</span>
+                </li>
+              )
+            })}
+          </ul>
+          <p className="text-xs text-muted-foreground">Cada mes suma 1. – = aún no hay parcial ese mes.</p>
+        </Panel>
+      </div>
     </Slide>
   )
 }
