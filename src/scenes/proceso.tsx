@@ -18,14 +18,14 @@ export function DatosScene() {
       <SceneHeader
         eyebrow="Metodología · Datos"
         title="De dónde vienen los datos"
-        intro="Se usaron las notas de los estudiantes de Pensamiento Cuantitativo de 2019 a 2022. Los datos los proporcionó la Ing. Lynette García Pérez y provienen de las bases de datos de la Universidad y de Canvas."
+        intro="Se usaron las notas de los estudiantes de Pensamiento Cuantitativo de 2019 a 2022. Los datos los proporcionó la Ing. Lynette García Pérez y provienen de las bases de datos de la Universidad, de Canvas y de un archivo de Excel con las actividades del curso."
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Stat label="Periodo" value={datos.periodo} sub="Cuatro años del curso" icon={Database} tone="primary" />
         <Stat label="Estudiantes" value={datos.filasRegistro.toLocaleString('es-GT')} sub="registros iniciales" icon={Users} />
         <Stat label="Actividades" value={datos.filasActividades.toLocaleString('es-GT')} sub="registros de tareas, parciales y exámenes" icon={Layers} />
-        <Stat label="Fuentes" value="2" sub="Bases de datos de la UVG y Canvas" icon={FileSpreadsheet} />
+        <Stat label="Fuentes" value="3" sub="Bases de datos de la UVG, Canvas y un Excel de actividades" icon={FileSpreadsheet} />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-4">
@@ -42,6 +42,23 @@ export function DatosScene() {
             </ul>
           </Card>
         ))}
+        <Card className="lg:col-span-2">
+          <CardHead icon={FileSpreadsheet} title="Registro de actividades por año" hint="Archivo de Excel" />
+          <div className="p-5 pt-3 grid md:grid-cols-[1fr_1.4fr] gap-4 items-center">
+            <ul className="divide-y divide-border">
+              {[
+                { v: 'Nombre de la actividad', d: 'Cada tarea, parcial y examen del curso.' },
+                { v: 'Puntos posibles', d: 'Lo máximo que se podía obtener.' },
+              ].map((i) => (
+                <li key={i.v} className="py-2 first:pt-0 last:pb-0 grid grid-cols-[minmax(0,11rem)_1fr] gap-3 text-xs">
+                  <span className="font-medium text-foreground">{i.v}</span>
+                  <span className="text-muted-foreground">{i.d}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-xs text-muted-foreground leading-relaxed">Lista las actividades que se hicieron en cada año analizado. Sirvió para verificar que las actividades registradas coincidieran con la estructura real del curso y para detectar actividades faltantes.</p>
+          </div>
+        </Card>
       </div>
 
       <Card tone="good">
