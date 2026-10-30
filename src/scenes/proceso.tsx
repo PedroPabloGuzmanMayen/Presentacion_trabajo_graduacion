@@ -1,4 +1,4 @@
-import { ArrowRight, Brain, Check, Database, FileSpreadsheet, Filter, GitBranch, KanbanSquare, Layers, Lock, Scissors, ShieldCheck, Sparkles, Users, Workflow, X } from 'lucide-react'
+import { ArrowRight, Brain, Check, Database, FileSpreadsheet, Filter, GitBranch, KanbanSquare, Layers, Lock, Scissors, ShieldCheck, Sparkles, Target, Users, Workflow, X } from 'lucide-react'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import { Badge, Card, CardHead, SceneHeader, Stat } from '@/components/ui'
 import { Legend, useChartStyle } from '@/components/charts'
@@ -294,6 +294,25 @@ export function EntrenamientoScene() {
         title="Cómo se entrenaron los modelos"
         intro="Se entrenaron 40 modelos: cinco algoritmos, uno para cada mes de enero a abril y con dos enfoques. El primero predice si el estudiante aprueba o reprueba; el segundo estima su nota final."
       />
+
+      <div className="grid md:grid-cols-2 gap-4">
+        {[
+          { t: 'Clasificación', q: '¿Aprueba o reprueba?', obj: 'Aprobado', tipo: 'Binaria', d: 'Vale 1 si el estudiante aprobó y 0 si reprobó. El modelo da la probabilidad de reprobar y se enfoca en encontrar a quienes reprueban.' },
+          { t: 'Regresión', q: '¿Qué nota sacará?', obj: 'Nota final', tipo: 'Numérica, de 0 a 100', d: 'El modelo estima la nota con la que el estudiante terminará el curso. Se aprueba con 61.' },
+        ].map((e) => (
+          <Card key={e.t} tone="accent">
+            <CardHead icon={Target} title={`${e.t} · ${e.q}`} />
+            <div className="p-5 pt-3 space-y-3">
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <span className="eyebrow">Variable objetivo</span>
+                <span className="text-lg font-semibold">{e.obj}</span>
+                <Badge>{e.tipo}</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">{e.d}</p>
+            </div>
+          </Card>
+        ))}
+      </div>
 
       <Card tone="primary">
         <CardHead icon={Workflow} title="Flujo de entrenamiento" hint="El mismo proceso se repitió para cada algoritmo y cada mes." />
