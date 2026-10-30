@@ -254,3 +254,45 @@ export const recomendaciones = [
   { titulo: 'Un modelo por departamento', texto: 'Evaluar si los cursos de primer año de Matemática siguen los mismos patrones y pueden usar un solo modelo.' },
   { titulo: 'Interacción en Canvas', texto: 'Usar años recientes para entender mejor los tiempos de entrega y el uso de la plataforma.' },
 ]
+
+// ---------- Datos originales ----------
+export const tablaEstudiantes = [
+  { v: 'Identificador anónimo', d: 'Reemplaza el carné de cada estudiante.' },
+  { v: 'Puntaje PAA', d: 'Nota del examen de admisión.' },
+  { v: 'Colegio', d: 'Institución de nivel medio de donde viene.' },
+  { v: 'Título de nivel medio', d: 'Por ejemplo, bachillerato en ciencias.' },
+  { v: 'Género', d: 'Femenino o masculino.' },
+  { v: 'Número de intento', d: 'Cuántas veces ha llevado el curso.' },
+  { v: 'Nota final y estado', d: 'Nota de 0 a 100 y si aprobó, reprobó o se retiró.' },
+]
+
+export const tablaActividades = [
+  { v: 'Actividad', d: 'Nombre de la tarea, parcial o examen.' },
+  { v: 'Año, ciclo y sección', d: 'Cuándo y en qué sección se hizo.' },
+  { v: 'Nota y puntos posibles', d: 'Lo que obtuvo el estudiante y el máximo posible.' },
+  { v: 'Fechas', d: 'De entrega, de cierre, de envío y de calificación.' },
+  { v: 'Tipo de entrega', d: 'En línea, en papel o en un quiz.' },
+  { v: 'Comentarios', d: 'Cantidad de comentarios en la entrega.' },
+]
+
+// ---------- Variables creadas ----------
+export const variablesCreadas = [
+  { grupo: 'Rendimiento en el curso', v: 'Porcentaje acumulado en actividades', d: 'Puntos obtenidos en tareas sobre los puntos posibles hasta el final de cada mes. Los parciales se analizan aparte.' },
+  { grupo: 'Rendimiento en el curso', v: 'Nota de cada parcial', d: 'Porcentaje obtenido en cada parcial. Se asignó el primero a febrero, el segundo a marzo, el tercero a abril y el final a mayo.' },
+  { grupo: 'Rendimiento en el curso', v: 'Cambio de un mes a otro', d: 'Cuánto subió o bajó el porcentaje acumulado respecto al mes anterior.' },
+  { grupo: 'Rendimiento en el curso', v: 'Comparación con la sección', d: 'Qué tan por encima o por debajo está el estudiante del promedio de su sección.' },
+  { grupo: 'Comportamiento en Canvas', v: 'Entregas tardías', d: 'Cantidad acumulada de tareas entregadas después de la fecha límite.' },
+  { grupo: 'Comportamiento en Canvas', v: 'Días para calificar', d: 'Tiempo típico entre que el estudiante entrega y recibe su nota. Una revisión tardía da menos oportunidad de mejorar.' },
+  { grupo: 'Comportamiento en Canvas', v: 'Cantidad de comentarios', d: 'Indicador de qué tanto interactúa el estudiante con el curso en la plataforma.' },
+  { grupo: 'Contexto del curso', v: 'Modalidad', d: 'Virtual en 2020 y 2021 por la pandemia; presencial en 2019 y 2022.' },
+]
+
+// ---------- Flujo de entrenamiento ----------
+export const flujoEntrenamiento = [
+  { t: 'Separar los datos', d: '70 % para aprender, 15 % para ajustar y 15 % para la evaluación final, con la misma proporción de reprobados en cada grupo.' },
+  { t: 'Preparar la información', d: 'Colegio y título se convierten en números usando solo los datos de aprendizaje, para no "filtrar" información de la evaluación.' },
+  { t: 'Buscar la mejor configuración', d: 'Se probaron 1,000 configuraciones distintas de cada modelo y se eligió la que mejor funcionaba con el grupo de ajuste.' },
+  { t: 'Entrenar el modelo final', d: 'Cada modelo se entrenó de nuevo con la configuración ganadora.' },
+  { t: 'Definir cuándo hay riesgo', d: 'Se eligió el punto a partir del cual el modelo marca a un estudiante en riesgo, buscando equilibrio entre casos detectados y falsas alarmas, con más peso en detectar.' },
+  { t: 'Evaluar', d: 'Se midió el desempeño con el 15 % de estudiantes que el modelo nunca vio.' },
+]

@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useState, type ComponentType } from 'react'
 import {
   ChevronLeft, ChevronRight, ClipboardCheck, Database, FlaskConical, GitBranch, Home, Lightbulb, ListFilter,
-  Menu, MessagesSquare, Moon, PanelLeftClose, PanelLeftOpen, Sigma, Sparkles, Sun, Target, Wrench, X,
+  Menu, MessagesSquare, Scissors, Search, Workflow, Moon, PanelLeftClose, PanelLeftOpen, Sigma, Sparkles, Sun, Target, Wrench, X,
   type LucideIcon,
 } from 'lucide-react'
 import clsx from 'clsx'
 import { InicioScene, ProblemaScene } from '@/scenes/contexto'
-import { DatosScene, MetodologiaScene, VariablesScene } from '@/scenes/proceso'
+import { CaracteristicasScene, DatosScene, EntrenamientoScene, ExploratorioScene, FasesScene, LimpiezaScene } from '@/scenes/proceso'
 import { ClasificacionScene, HallazgosScene, ImportanciaScene, RegresionScene } from '@/scenes/resultados'
 import { ConclusionesScene, DiscusionScene, HerramientaScene } from '@/scenes/cierre'
 
@@ -20,11 +20,14 @@ const grupos: Array<{ titulo: string; escenas: Scene[] }> = [
     ],
   },
   {
-    titulo: 'Cómo se hizo',
+    titulo: 'Metodología',
     escenas: [
-      { id: 'datos', label: 'Datos y limpieza', icon: Database, component: DatosScene },
-      { id: 'metodologia', label: 'Metodología', icon: GitBranch, component: MetodologiaScene },
-      { id: 'variables', label: 'Variables', icon: ListFilter, component: VariablesScene },
+      { id: 'datos', label: 'Datos', icon: Database, component: DatosScene },
+      { id: 'fases', label: 'Fases del estudio', icon: GitBranch, component: FasesScene },
+      { id: 'limpieza', label: 'Limpieza de datos', icon: Scissors, component: LimpiezaScene },
+      { id: 'variables', label: 'Creación de variables', icon: ListFilter, component: CaracteristicasScene },
+      { id: 'exploratorio', label: 'Análisis exploratorio', icon: Search, component: ExploratorioScene },
+      { id: 'entrenamiento', label: 'Entrenamiento', icon: Workflow, component: EntrenamientoScene },
     ],
   },
   {

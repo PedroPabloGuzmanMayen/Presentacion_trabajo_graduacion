@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { Award, BarChart3, Crosshair, Repeat, Ruler, Sigma, Users } from 'lucide-react'
+import { Award, Crosshair, Repeat, Ruler, Sigma, Users } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, Line, LineChart, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import clsx from 'clsx'
 import { Badge, Card, CardHead, SceneHeader, Segmented, Stat } from '@/components/ui'
 import { IqrBar, Legend, useChartStyle } from '@/components/charts'
 import { modelColor } from '@/lib/theme'
 import {
-  acumuladoPorMes, clasificacion, importanciaClf, importanciaReg, meses, modelos, modelosReg, notaPorIntento, paaPorClase,
+  clasificacion, importanciaClf, importanciaReg, meses, modelos, modelosReg, notaPorIntento, paaPorClase,
   parcialesPorClase, promediosClf, promediosReg, regresion, reprobacionPorGenero, reprobacionPorIntento, reprobadosPrueba, variablesImp,
 } from '@/data/tesis'
 
@@ -82,22 +82,6 @@ export function HallazgosScene() {
         </Card>
       </div>
 
-      <Card>
-        <CardHead icon={BarChart3} title="Porcentaje acumulado en actividades al final de cada mes" hint="Valor del estudiante típico de cada grupo. Desde febrero, los dos grupos ya se separan claramente." />
-        <div className="h-60 px-2 pb-3 pt-3">
-          <ResponsiveContainer>
-            <LineChart data={acumuladoPorMes} margin={{ right: 24, left: -8, top: 8 }}>
-              <CartesianGrid {...grid} />
-              <XAxis dataKey="mes" {...axis} />
-              <YAxis domain={[40, 100]} unit=" %" {...axis} />
-              <Tooltip {...tooltip} formatter={(v: number, n: string) => [`${v} %`, n === 'aprobado' ? 'Aprobó' : 'Reprobó']} />
-              <Line dataKey="aprobado" stroke={p.primary} strokeWidth={2.5} dot={{ r: 3, fill: p.primary }} />
-              <Line dataKey="reprobado" stroke={p.bad} strokeWidth={2.5} dot={{ r: 3, fill: p.bad }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="px-5 pb-4"><Legend items={[{ label: 'Aprobó', color: p.primary }, { label: 'Reprobó', color: p.bad }]} /></div>
-      </Card>
     </section>
   )
 }
