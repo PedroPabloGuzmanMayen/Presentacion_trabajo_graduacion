@@ -6,7 +6,7 @@ import { Segmented } from '@/components/ui'
 import { Big, Panel, Slide } from '@/components/slide'
 import { Legend, useChartStyle } from '@/components/charts'
 import { modelColor } from '@/lib/theme'
-import { clasificacion, importanciaClf, meses, modelos, promediosClf, regresion, reprobacionPorIntento, reprobadosPrueba, type Mes } from '@/data/tesis'
+import { clasificacion, importanciaClf, meses, modelos, modelosReg, promediosClf, promediosReg, regresion, reprobacionPorIntento, reprobadosPrueba, type Mes } from '@/data/tesis'
 
 const mesCorto = (m: string) => m.slice(0, 3)
 
@@ -55,7 +55,7 @@ export function HallazgosScene() {
   )
 }
 
-// ---------------------------------------------------------------- Clasificación (Random Forest)
+// ---------------------------------------------------------------- Casos detectados (Random Forest, después de la discusión)
 export function ClasificacionScene() {
   const [mes, setMes] = useState<Mes>('Enero')
   const r = clasificacion.find((c) => c.modelo === 'Random Forest' && c.mes === mes)!
@@ -63,7 +63,7 @@ export function ClasificacionScene() {
   const fp = Math.round(tp / r.prec) - tp
   const fn = reprobadosPrueba - tp
   return (
-    <Slide eyebrow="Resultados · Random Forest" title="Detecta 9 de cada 10 desde enero">
+    <Slide eyebrow="Modelo elegido · Random Forest" title="Detecta 9 de cada 10 desde enero">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <Segmented label="Mes" value={mes} options={meses} onChange={setMes} />
         <p className="text-base text-muted-foreground">{reprobadosPrueba} estudiantes que reprobaron, nunca vistos por el modelo</p>
@@ -96,10 +96,59 @@ export function ClasificacionScene() {
 }
 
 // ---------------------------------------------------------------- Comparación de modelos
+// Gráfica de barras por mes con los cinco algoritmos, sin resaltar a ninguno.
+function ComparacionMeses({ data, series, domain, ticks, unit, fmt }: {
+  data: Array<Record<string, number | string>>
+  series: readonly string[]
+  domain: [number, number]
+  ticks: number[]
+  unit: string
+  fmt: (v: number) => string
+}) {
+  const { p, axis, grid, tooltip } = useChartStyle()
+  return (
+    <>
+      <div className="h-80 mt-3">
+        <ResponsiveContainer>
+          <BarChart data={data} margin={{ top: 12, right: 8, left: -10 }} barCategoryGap="20%" barGap={3}>
+            <CartesianGrid {...grid} />
+            <XAxis dataKey="mes" {...axis} tick={{ ...axis.tick, fontSize: 15, fontWeight: 600 }} />
+            <YAxis domain={domain} ticks={ticks} allowDataOverflow unit={unit} {...axis} tick={{ ...axis.tick, fontSize: 12 }} />
+            <Tooltip {...tooltip} formatter={(v: number, n: string) => [fmt(v), n]} />
+            {series.map((m, i) => (
+              <Bar key={m} dataKey={m} fill={modelColor(p, i)} radius={[4, 4, 0, 0]} animationDuration={500} />
+            ))}
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="mt-3">
+        <Legend className="text-sm md:text-base" items={series.map((m, i) => ({ label: m, color: modelColor(p, i) }))} />
+      </div>
+    </>
+  )
+}
+
+function Promedios({ titulo, filas }: { titulo: string; filas: Array<{ modelo: string; valor: string; color: string }> }) {
+  return (
+    <Panel className="flex flex-col gap-4">
+      <p className="eyebrow">{titulo}</p>
+      <ul className="space-y-3">
+        {filas.map((f) => (
+          <li key={f.modelo} className="flex items-center gap-3">
+            <span className="h-3 w-3 shrink-0 rounded-sm" style={{ background: f.color }} aria-hidden="true" />
+            <span className="text-sm md:text-base text-muted-foreground flex-1 min-w-0">{f.modelo}</span>
+            <span className="text-lg md:text-xl font-semibold num">{f.valor}</span>
+          </li>
+        ))}
+      </ul>
+    </Panel>
+  )
+}
+
 type Vista = 'detectados' | 'alarmas'
 
 export function ComparacionScene() {
-  const { p, axis, grid, tooltip } = useChartStyle()
+  const { p } = useChartStyle()
   const [vista, setVista] = useState<Vista>('detectados')
   const det = vista === 'detectados'
   const data = meses.map((mes) => {
@@ -110,15 +159,13 @@ export function ComparacionScene() {
     }
     return row
   })
-  const rf = promediosClf.find((m) => m.modelo === 'Random Forest')!
-  const color = (i: number) => modelColor(p, i)
   const opciones: Array<{ id: Vista; label: string; icon: typeof Check; tone: string }> = [
     { id: 'detectados', label: 'Casos reales detectados', icon: Check, tone: 'border-good/60 bg-good/15 text-good' },
     { id: 'alarmas', label: 'Falsas alarmas', icon: BellRing, tone: 'border-warn/60 bg-warn/15 text-warn' },
   ]
 
   return (
-    <Slide eyebrow="Resultados · Comparación" title="Random Forest: el mejor equilibrio">
+    <Slide eyebrow="Resultados · ¿Aprueba o reprueba?" title="Todos los modelos mejoran con los meses">
       <div role="radiogroup" aria-label="Qué comparar" className="flex flex-wrap gap-3">
         {opciones.map((o) => (
           <button
@@ -137,42 +184,54 @@ export function ComparacionScene() {
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-[1fr_15rem] gap-5">
+      <div className="grid lg:grid-cols-[1fr_17rem] gap-5">
         <Panel>
           <p className="text-base md:text-lg font-semibold">{det ? 'Porcentaje de reprobados que el modelo detectó' : 'Porcentaje de alertas que eran estudiantes que aprobaron'}</p>
           <p className="text-sm text-muted-foreground">{det ? 'Más alto es mejor' : 'Más bajo es mejor'}</p>
-          <div className="h-80 mt-3">
-            <ResponsiveContainer>
-              <BarChart data={data} margin={{ top: 28, right: 8, left: -14 }} barCategoryGap="22%" barGap={3}>
-                <CartesianGrid {...grid} />
-                <XAxis dataKey="mes" {...axis} tick={{ ...axis.tick, fontSize: 15, fontWeight: 600 }} />
-                <YAxis domain={det ? [60, 100] : [0, 40]} ticks={det ? [60, 70, 80, 90, 100] : [0, 10, 20, 30, 40]} allowDataOverflow unit=" %" {...axis} tick={{ ...axis.tick, fontSize: 12 }} />
-                <Tooltip {...tooltip} formatter={(v: number, n: string) => [`${v.toFixed(1)} %`, n]} />
-                {modelos.map((m, i) => (
-                  <Bar key={m} dataKey={m} fill={color(i)} fillOpacity={i === 0 ? 1 : 0.38} radius={[4, 4, 0, 0]} animationDuration={500}>
-                    {i === 0 && (
-                      <LabelList dataKey={m} position="top" formatter={(v: number) => `${Math.round(v)}%`} style={{ fill: p.foreground, fontSize: 14, fontWeight: 700 }} />
-                    )}
-                  </Bar>
-                ))}
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="mt-3">
-            <Legend className="text-sm md:text-base" items={modelos.map((m, i) => ({ label: m, color: i === 0 ? color(i) : `color-mix(in srgb, ${color(i)} 45%, transparent)`, strong: i === 0 }))} />
-          </div>
-        </Panel>
-
-        <Panel className="flex flex-col justify-center gap-6">
-          <Big
-            value={`${Math.round((det ? rf.sens : 1 - rf.prec) * 100)} %`}
-            label="promedio de Random Forest"
-            tone={det ? 'good' : 'warn'}
+          <ComparacionMeses
+            data={data}
+            series={modelos}
+            domain={det ? [60, 100] : [0, 40]}
+            ticks={det ? [60, 70, 80, 90, 100] : [0, 10, 20, 30, 40]}
+            unit=" %"
+            fmt={(v) => `${v.toFixed(1)} %`}
           />
-          <p className="text-base md:text-lg font-medium leading-snug">
-            {det ? 'Detecta casi todos los casos, todos los meses.' : 'De las más bajas, y casi nulas en abril.'}
-          </p>
         </Panel>
+        <Promedios
+          titulo="Promedio de enero a abril"
+          filas={promediosClf.map((m, i) => ({ modelo: m.modelo, valor: `${Math.round((det ? m.sens : 1 - m.prec) * 100)} %`, color: modelColor(p, i) }))}
+        />
+      </div>
+    </Slide>
+  )
+}
+
+export function ComparacionRegScene() {
+  const { p } = useChartStyle()
+  const data = meses.map((mes) => {
+    const row: Record<string, number | string> = { mes }
+    for (const m of modelosReg) row[m] = regresion.find((r) => r.modelo === m && r.mes === mes)!.rmse
+    return row
+  })
+  return (
+    <Slide eyebrow="Resultados · ¿Qué nota sacará?" title="El error baja conforme avanza el semestre">
+      <div className="grid lg:grid-cols-[1fr_17rem] gap-5">
+        <Panel>
+          <p className="text-base md:text-lg font-semibold">Error de la nota estimada, en puntos (RMSE)</p>
+          <p className="text-sm text-muted-foreground">Más bajo es mejor</p>
+          <ComparacionMeses
+            data={data}
+            series={modelosReg}
+            domain={[0, 16]}
+            ticks={[0, 4, 8, 12, 16]}
+            unit=""
+            fmt={(v) => `${v.toFixed(1)} puntos`}
+          />
+        </Panel>
+        <Promedios
+          titulo="Promedio de enero a abril"
+          filas={promediosReg.map((m, i) => ({ modelo: m.modelo, valor: `${m.rmse.toFixed(1)} pts`, color: modelColor(p, i) }))}
+        />
       </div>
     </Slide>
   )
@@ -220,7 +279,9 @@ export function RegresionScene() {
 // ---------------------------------------------------------------- Importancia
 export function ImportanciaScene() {
   const { p, axis, grid } = useChartStyle()
-  const m = importanciaClf['Random Forest']
+  // Promedio de los cinco modelos de clasificación (cada uno ya está normalizado).
+  const lista = Object.values(importanciaClf)
+  const m = meses.map((_, mi) => lista[0][mi].map((_, vi) => lista.reduce((acc, mod) => acc + mod[mi][vi], 0) / lista.length))
   const trend = meses.map((mes, i) => ({
     mes: mesCorto(mes),
     intento: m[i][0],
@@ -237,13 +298,13 @@ export function ImportanciaScene() {
   return (
     <Slide eyebrow="Resultados · ¿En qué se fija?" title="Al inicio pesa el historial; después, el rendimiento">
       <Panel>
-        <p className="text-base text-muted-foreground">Importancia de cada dato para Random Forest</p>
+        <p className="text-base text-muted-foreground">Importancia de cada dato, promedio de los cinco modelos</p>
         <div className="h-80 mt-2">
           <ResponsiveContainer>
             <LineChart data={trend} margin={{ right: 24, left: -12, top: 12 }}>
               <CartesianGrid {...grid} />
               <XAxis dataKey="mes" {...axis} tick={{ ...axis.tick, fontSize: 14 }} />
-              <YAxis domain={[0, 0.6]} {...axis} />
+              <YAxis domain={[0, 0.7]} ticks={[0, 0.2, 0.4, 0.6]} {...axis} />
               {series.map((s) => <Line key={s.k} dataKey={s.k} stroke={s.c} strokeWidth={s.k === 'perfil' ? 2.5 : 4} dot={{ r: 5, fill: s.c }} isAnimationActive={false} />)}
             </LineChart>
           </ResponsiveContainer>

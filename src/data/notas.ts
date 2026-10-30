@@ -60,15 +60,16 @@ export const notas: Record<string, string[]> = {
     'Repetir el curso no mejora el rendimiento. Coincide con Pineda (2024) en Cálculo 1: el patrón se repite en varios cursos del Departamento de Matemática.',
     'Las notas en parciales y la PAA también separan claramente a ambos grupos.',
   ],
-  clasificacion: [
-    'Resultados sobre el conjunto de prueba: 48 estudiantes que reprobaron.',
-    'Random Forest detecta 43 de 48 desde enero, y todos desde marzo.',
-    'Las falsas alarmas bajan con los meses: en abril solo 2.',
-  ],
   comparacion: [
-    'El mejor modelo de clasificación fue Random Forest: el mejor balance entre casos detectados y falsas alarmas.',
-    'XGBoost y el Árbol detectan un poco más, pero con muchas más falsas alarmas. La Regresión Logística casi no da falsas alarmas, pero en enero solo detecta el 72.9 %.',
-    'Me quedé con Random Forest y el enfoque de clasificación porque detecta más casos de reprobación.',
+    'Resultados sobre el conjunto de prueba, con estudiantes que los modelos nunca vieron: 48 de ellos reprobaron.',
+    'Todos los modelos mejoran conforme avanza el semestre y tienen más información.',
+    'En enero detectan entre 72.9 % y 89.6 % de los casos; en abril, entre 97.9 % y 100 %.',
+    'Cambiar a "Falsas alarmas": también bajan con los meses. El Árbol de decisión es el que más genera en febrero y marzo.',
+  ],
+  'comparacion-nota': [
+    'Segundo enfoque: estimar la nota final.',
+    'En enero todos los modelos se equivocan entre 14 y 15 puntos; en abril, entre 4 y 8.',
+    'El Árbol de decisión es el que más se equivoca. La regresión lineal tiene el menor error promedio.',
   ],
   regresion: [
     'La mejor regresión fue la lineal. Al final del semestre estima la nota con bastante precisión.',
@@ -76,6 +77,7 @@ export const notas: Record<string, string[]> = {
     'Por eso se descartó como modelo principal, pero sugiero usarla como complemento: alguien marcado sin riesgo pero con nota estimada baja merece seguimiento.',
   ],
   importancia: [
+    'Promedio de los cinco modelos de clasificación: todos siguen el mismo patrón.',
     'En los primeros meses el modelo le da más importancia al número de intento que al porcentaje acumulado.',
     'Con el paso de los meses importan más las notas de los parciales y el porcentaje acumulado.',
     'El número de intento tiene gran capacidad predictiva en los primeros meses.',
@@ -86,9 +88,17 @@ export const notas: Record<string, string[]> = {
     'Las predicciones se exportan en .csv.',
   ],
   discusion: [
-    'Random Forest: no tiene la mayor sensibilidad, pero sí el mejor balance, y detecta gran parte de los casos desde el primer mes.',
+    'El mejor modelo de clasificación fue Random Forest: no tiene la mayor sensibilidad, pero sí el mejor balance entre casos detectados y falsas alarmas.',
+    'XGBoost y el Árbol detectan un poco más, pero con más falsas alarmas. La Regresión Logística casi no da falsas alarmas, pero en enero solo detecta el 72.9 %, y enero es el mes más importante.',
+    'Me quedé con Random Forest y el enfoque de clasificación porque detecta más casos de reprobación. La regresión queda como complemento.',
     'Las métricas son del conjunto de prueba: no hay señales de sobreajuste.',
+    'Coincide con Pineda (2024): repetir el curso no mejora el rendimiento.',
     'Limitaciones: en 2019 las entregas eran en papel y Canvas casi no se usaba (unos 400 estudiantes); faltaban puntajes PAA; no había variables demográficas.',
+  ],
+  casos: [
+    'Así se ve Random Forest con los 48 estudiantes que reprobaron en el conjunto de prueba.',
+    'Detecta 43 de 48 desde enero, y todos desde marzo.',
+    'Las falsas alarmas bajan con los meses: en abril solo 2.',
   ],
   conclusiones: [
     'El modelo detecta al menos el 89.6 % de los reprobados desde el primer mes.',

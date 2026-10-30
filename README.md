@@ -16,7 +16,7 @@ npm run build:artifact   # un solo archivo HTML en dist-artifact/
 - **F** oculta el menú lateral para presentar en pantalla completa.
 - Cada diapositiva tiene su enlace directo: `#inicio`, `#problema`, `#pregunta`, `#datos`, `#fases`,
   `#limpieza`, `#variables`, `#exploratorio`, `#modelos`, `#entrenamiento`, `#hallazgos`,
-  `#clasificacion`, `#comparacion`, `#regresion`, `#importancia`, `#herramienta`, `#discusion`,
-  `#conclusiones`.
+  `#comparacion`, `#comparacion-nota`, `#regresion`, `#importancia`, `#herramienta`, `#discusion`,
+  `#casos`, `#conclusiones`.
 - Todas las cifras están en `src/data/tesis.ts`. Las importancias de variables se leyeron de las
   figuras 6.6–6.15 (valores aproximados).

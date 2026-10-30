@@ -222,7 +222,7 @@ export function ModelosScene() {
       </div>
 
       <div className="flex flex-wrap gap-2.5">
-        {algos.map((a) => <Chip key={a.t} icon={a.icon} tone={a.t === 'Random Forest' ? 'primary' : 'neutral'}>{a.t}</Chip>)}
+        {algos.map((a) => <Chip key={a.t} icon={a.icon}>{a.t}</Chip>)}
       </div>
     </Slide>
   )

@@ -7,7 +7,7 @@ import {
 import clsx from 'clsx'
 import { InicioScene, PreguntaScene, ProblemaScene } from '@/scenes/contexto'
 import { CaracteristicasScene, DatosScene, EntrenamientoScene, ExploratorioScene, FasesScene, LimpiezaScene, ModelosScene } from '@/scenes/proceso'
-import { ClasificacionScene, ComparacionScene, HallazgosScene, ImportanciaScene, RegresionScene } from '@/scenes/resultados'
+import { ClasificacionScene, ComparacionRegScene, ComparacionScene, HallazgosScene, ImportanciaScene, RegresionScene } from '@/scenes/resultados'
 import { notas } from '@/data/notas'
 import { ConclusionesScene, DiscusionScene, HerramientaScene } from '@/scenes/cierre'
 
@@ -37,8 +37,8 @@ const grupos: Array<{ titulo: string; escenas: Scene[] }> = [
     titulo: 'Resultados',
     escenas: [
       { id: 'hallazgos', label: 'Hallazgos', icon: Lightbulb, component: HallazgosScene },
-      { id: 'clasificacion', label: 'Casos detectados', icon: ClipboardCheck, component: ClasificacionScene },
-      { id: 'comparacion', label: 'Comparación de modelos', icon: BarChart3, component: ComparacionScene },
+      { id: 'comparacion', label: 'Comparación: ¿aprueba?', icon: BarChart3, component: ComparacionScene },
+      { id: 'comparacion-nota', label: 'Comparación: nota', icon: BarChart3, component: ComparacionRegScene },
       { id: 'regresion', label: 'Nota estimada', icon: Sigma, component: RegresionScene },
       { id: 'importancia', label: '¿En qué se fija el modelo?', icon: Sparkles, component: ImportanciaScene },
       { id: 'herramienta', label: 'Herramienta', icon: Wrench, component: HerramientaScene },
@@ -48,6 +48,7 @@ const grupos: Array<{ titulo: string; escenas: Scene[] }> = [
     titulo: 'Cierre',
     escenas: [
       { id: 'discusion', label: 'Discusión', icon: MessagesSquare, component: DiscusionScene },
+      { id: 'casos', label: 'Casos detectados', icon: ClipboardCheck, component: ClasificacionScene },
       { id: 'conclusiones', label: 'Conclusiones y recomendaciones', icon: FlaskConical, component: ConclusionesScene },
     ],
   },
