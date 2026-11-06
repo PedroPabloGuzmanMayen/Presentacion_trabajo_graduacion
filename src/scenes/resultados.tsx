@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowRight, BellRing, Check, User } from 'lucide-react'
+import { ArrowRight, BellRing, Check, Ruler, Scale, Sigma, Target, TrendingUp, User } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, Cell, LabelList, Line, LineChart, ReferenceArea, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import clsx from 'clsx'
 import { Segmented } from '@/components/ui'
@@ -145,94 +145,142 @@ function Promedios({ titulo, filas }: { titulo: string; filas: Array<{ modelo: s
   )
 }
 
-type Vista = 'detectados' | 'alarmas'
+// Cada medida que se puede comparar: cómo leerla del modelo y cómo mostrarla.
+type Medida<R> = {
+  id: string
+  label: string
+  icon: typeof Check
+  tone: string
+  titulo: string
+  ayuda: string
+  valor: (r: R) => number
+  domain: [number, number]
+  ticks: number[]
+  unit: string
+  fmt: (v: number) => string
+}
 
-export function ComparacionScene() {
+const tonos = {
+  good: 'border-good/60 bg-good/15 text-good',
+  warn: 'border-warn/60 bg-warn/15 text-warn',
+  primary: 'border-primary/60 bg-primary/15 text-primary',
+  accent: 'border-accent/60 bg-accent/15 text-accent',
+}
+
+function SelectorMedida<R>({ medidas, value, onChange }: { medidas: Medida<R>[]; value: string; onChange: (id: string) => void }) {
+  return (
+    <div role="radiogroup" aria-label="Qué comparar" className="flex flex-wrap gap-2.5">
+      {medidas.map((o) => (
+        <button
+          key={o.id}
+          type="button"
+          role="radio"
+          aria-checked={value === o.id}
+          onClick={() => onChange(o.id)}
+          className={clsx(
+            'flex items-center gap-2 rounded-full border-2 px-4 py-2 text-sm md:text-base font-semibold transition-colors',
+            value === o.id ? o.tone : 'border-border text-muted-foreground hover:text-foreground hover:bg-muted',
+          )}
+        >
+          <o.icon className="h-4 w-4 md:h-5 md:w-5" aria-hidden="true" />{o.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+type FilaClf = (typeof clasificacion)[number]
+const pct = (v: number) => `${v.toFixed(1)} %`
+const dec = (v: number) => v.toFixed(3)
+
+const medidasClf: Medida<Pick<FilaClf, 'sens' | 'prec' | 'f2' | 'prauc'>>[] = [
+  {
+    id: 'detectados', label: 'Casos reales detectados', icon: Check, tone: tonos.good,
+    titulo: 'Porcentaje de reprobados que el modelo detectó', ayuda: 'Más alto es mejor',
+    valor: (r) => r.sens * 100, domain: [60, 100], ticks: [60, 70, 80, 90, 100], unit: ' %', fmt: pct,
+  },
+  {
+    id: 'alarmas', label: 'Falsas alarmas', icon: BellRing, tone: tonos.warn,
+    titulo: 'Porcentaje de alertas que eran estudiantes que aprobaron', ayuda: 'Más bajo es mejor',
+    valor: (r) => (1 - r.prec) * 100, domain: [0, 40], ticks: [0, 10, 20, 30, 40], unit: ' %', fmt: pct,
+  },
+  {
+    id: 'f2', label: 'F2-score', icon: Scale, tone: tonos.primary,
+    titulo: 'Equilibrio entre casos detectados y falsas alarmas (F2)', ayuda: 'Más alto es mejor · da el doble de peso a detectar',
+    valor: (r) => r.f2, domain: [0.7, 1], ticks: [0.7, 0.8, 0.9, 1], unit: '', fmt: dec,
+  },
+  {
+    id: 'prauc', label: 'PR-AUC', icon: Target, tone: tonos.accent,
+    titulo: 'Qué tan bien distingue a quienes reprueban (PR-AUC)', ayuda: 'Más alto es mejor · de 0 a 1, sin depender del punto de riesgo',
+    valor: (r) => r.prauc, domain: [0.7, 1], ticks: [0.7, 0.8, 0.9, 1], unit: '', fmt: dec,
+  },
+]
+
+type FilaReg = (typeof regresion)[number]
+const pts = (v: number) => `${v.toFixed(1)} pts`
+
+const medidasReg: Medida<Pick<FilaReg, 'rmse' | 'mae' | 'r'>>[] = [
+  {
+    id: 'rmse', label: 'RMSE', icon: Sigma, tone: tonos.primary,
+    titulo: 'Error de la nota estimada, en puntos (RMSE)', ayuda: 'Más bajo es mejor · castiga más los errores grandes',
+    valor: (r) => r.rmse, domain: [0, 16], ticks: [0, 4, 8, 12, 16], unit: '', fmt: pts,
+  },
+  {
+    id: 'mae', label: 'MAE', icon: Ruler, tone: tonos.accent,
+    titulo: 'Error promedio de la nota estimada, en puntos (MAE)', ayuda: 'Más bajo es mejor',
+    valor: (r) => r.mae, domain: [0, 12], ticks: [0, 3, 6, 9, 12], unit: '', fmt: pts,
+  },
+  {
+    id: 'r', label: 'Correlación', icon: TrendingUp, tone: tonos.good,
+    titulo: 'Qué tanto se parece la nota estimada a la real (correlación)', ayuda: 'Más alto es mejor · de 0 a 1',
+    valor: (r) => r.r, domain: [0.7, 1], ticks: [0.7, 0.8, 0.9, 1], unit: '', fmt: dec,
+  },
+]
+
+function Comparacion<R>({ medidas, filas, promedios, series }: {
+  medidas: Medida<R>[]
+  filas: Array<R & { modelo: string; mes: Mes }>
+  promedios: Array<R & { modelo: string }>
+  series: readonly string[]
+}) {
   const { p } = useChartStyle()
-  const [vista, setVista] = useState<Vista>('detectados')
-  const det = vista === 'detectados'
+  const [id, setId] = useState(medidas[0].id)
+  const md = medidas.find((x) => x.id === id) ?? medidas[0]
   const data = meses.map((mes) => {
     const row: Record<string, number | string> = { mes }
-    for (const m of modelos) {
-      const r = clasificacion.find((c) => c.modelo === m && c.mes === mes)!
-      row[m] = +((det ? r.sens : 1 - r.prec) * 100).toFixed(1)
-    }
+    for (const m of series) row[m] = +md.valor(filas.find((r) => r.modelo === m && r.mes === mes)!).toFixed(3)
     return row
   })
-  const opciones: Array<{ id: Vista; label: string; icon: typeof Check; tone: string }> = [
-    { id: 'detectados', label: 'Casos reales detectados', icon: Check, tone: 'border-good/60 bg-good/15 text-good' },
-    { id: 'alarmas', label: 'Falsas alarmas', icon: BellRing, tone: 'border-warn/60 bg-warn/15 text-warn' },
-  ]
-
   return (
-    <Slide eyebrow="Resultados · ¿Aprueba o reprueba?" title="Todos los modelos mejoran con los meses">
-      <div role="radiogroup" aria-label="Qué comparar" className="flex flex-wrap gap-3">
-        {opciones.map((o) => (
-          <button
-            key={o.id}
-            type="button"
-            role="radio"
-            aria-checked={vista === o.id}
-            onClick={() => setVista(o.id)}
-            className={clsx(
-              'flex items-center gap-2.5 rounded-full border-2 px-5 py-2.5 text-base md:text-lg font-semibold transition-colors',
-              vista === o.id ? o.tone : 'border-border text-muted-foreground hover:text-foreground hover:bg-muted',
-            )}
-          >
-            <o.icon className="h-5 w-5" aria-hidden="true" />{o.label}
-          </button>
-        ))}
-      </div>
-
+    <>
+      <SelectorMedida medidas={medidas} value={md.id} onChange={setId} />
       <div className="grid lg:grid-cols-[1fr_17rem] gap-5">
         <Panel>
-          <p className="text-base md:text-lg font-semibold">{det ? 'Porcentaje de reprobados que el modelo detectó' : 'Porcentaje de alertas que eran estudiantes que aprobaron'}</p>
-          <p className="text-sm text-muted-foreground">{det ? 'Más alto es mejor' : 'Más bajo es mejor'}</p>
-          <ComparacionMeses
-            data={data}
-            series={modelos}
-            domain={det ? [60, 100] : [0, 40]}
-            ticks={det ? [60, 70, 80, 90, 100] : [0, 10, 20, 30, 40]}
-            unit=" %"
-            fmt={(v) => `${v.toFixed(1)} %`}
-          />
+          <p className="text-base md:text-lg font-semibold">{md.titulo}</p>
+          <p className="text-sm text-muted-foreground">{md.ayuda}</p>
+          <ComparacionMeses data={data} series={series} domain={md.domain} ticks={md.ticks} unit={md.unit} fmt={md.fmt} />
         </Panel>
         <Promedios
           titulo="Promedio de enero a abril"
-          filas={promediosClf.map((m, i) => ({ modelo: m.modelo, valor: `${Math.round((det ? m.sens : 1 - m.prec) * 100)} %`, color: modelColor(p, i) }))}
+          filas={series.map((m, i) => ({ modelo: m, valor: md.fmt(md.valor(promedios.find((x) => x.modelo === m)!)), color: modelColor(p, i) }))}
         />
       </div>
+    </>
+  )
+}
+
+export function ComparacionScene() {
+  return (
+    <Slide eyebrow="Resultados · ¿Aprueba o reprueba?" title="Todos los modelos mejoran con los meses">
+      <Comparacion medidas={medidasClf} filas={clasificacion} promedios={promediosClf} series={modelos} />
     </Slide>
   )
 }
 
 export function ComparacionRegScene() {
-  const { p } = useChartStyle()
-  const data = meses.map((mes) => {
-    const row: Record<string, number | string> = { mes }
-    for (const m of modelosReg) row[m] = regresion.find((r) => r.modelo === m && r.mes === mes)!.rmse
-    return row
-  })
   return (
     <Slide eyebrow="Resultados · ¿Qué nota sacará?" title="El error baja conforme avanza el semestre">
-      <div className="grid lg:grid-cols-[1fr_17rem] gap-5">
-        <Panel>
-          <p className="text-base md:text-lg font-semibold">Error de la nota estimada, en puntos (RMSE)</p>
-          <p className="text-sm text-muted-foreground">Más bajo es mejor</p>
-          <ComparacionMeses
-            data={data}
-            series={modelosReg}
-            domain={[0, 16]}
-            ticks={[0, 4, 8, 12, 16]}
-            unit=""
-            fmt={(v) => `${v.toFixed(1)} puntos`}
-          />
-        </Panel>
-        <Promedios
-          titulo="Promedio de enero a abril"
-          filas={promediosReg.map((m, i) => ({ modelo: m.modelo, valor: `${m.rmse.toFixed(1)} pts`, color: modelColor(p, i) }))}
-        />
-      </div>
+      <Comparacion medidas={medidasReg} filas={regresion} promedios={promediosReg} series={modelosReg} />
     </Slide>
   )
 }
@@ -320,6 +368,7 @@ export function ImportanciaScene() {
       <div className="flex flex-wrap items-center gap-3">
         <Segmented label="Enfoque" value={enfoque} options={enfoques} onChange={setEnfoque} />
         <Segmented label="Modelo" value={sel} options={opciones} onChange={setModelo} />
+        <Segmented label="Mes" value={mes} options={meses} onChange={setMes} />
       </div>
 
       <div className="grid lg:grid-cols-[1.35fr_1fr] gap-5">
@@ -328,12 +377,31 @@ export function ImportanciaScene() {
           <p className="text-sm text-muted-foreground">Importancia agrupada · {etiqueta}</p>
           <div className="h-64 mt-2">
             <ResponsiveContainer>
-              <LineChart data={trend} margin={{ right: 20, left: -14, top: 12 }}>
+              <LineChart
+                data={trend}
+                margin={{ right: 20, left: -14, top: 12 }}
+                onClick={(e: { activeTooltipIndex?: number }) => { if (e?.activeTooltipIndex != null) setMes(meses[e.activeTooltipIndex]) }}
+                style={{ cursor: 'pointer' }}
+              >
                 <CartesianGrid {...grid} />
                 <XAxis dataKey="mes" {...axis} tick={{ ...axis.tick, fontSize: 14 }} />
                 <YAxis domain={[0, 1]} ticks={[0, 0.25, 0.5, 0.75, 1]} {...axis} />
+                <ReferenceArea x1={mesCorto(mes)} x2={mesCorto(mes)} fill={p.primary} fillOpacity={0.1} ifOverflow="extendDomain" />
+                <ReferenceLine x={mesCorto(mes)} stroke={p.primary} strokeOpacity={0.5} strokeDasharray="4 4" />
                 <Tooltip {...tooltip} formatter={(v: number, n: string) => [v.toFixed(2), series.find((x) => x.k === n)?.label ?? n]} />
-                {series.map((x) => <Line key={x.k} dataKey={x.k} stroke={x.c} strokeWidth={x.k === 'perfil' ? 2.5 : 4} dot={{ r: 5, fill: x.c }} animationDuration={400} />)}
+                {series.map((x) => (
+                  <Line
+                    key={x.k}
+                    dataKey={x.k}
+                    stroke={x.c}
+                    strokeWidth={x.k === 'perfil' ? 2.5 : 4}
+                    animationDuration={400}
+                    dot={(d: { cx?: number; cy?: number; index?: number }) => (
+                      <circle key={`${x.k}-${d.index}`} cx={d.cx} cy={d.cy} r={d.index === mi ? 8 : 4} fill={x.c} stroke={d.index === mi ? p.card : 'none'} strokeWidth={2} />
+                    )}
+                    activeDot={{ r: 7 }}
+                  />
+                ))}
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -341,9 +409,9 @@ export function ImportanciaScene() {
         </Panel>
 
         <Panel className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-base font-semibold">Cada variable</p>
-            <Segmented label="Mes" value={mes} options={meses} onChange={setMes} />
+          <div>
+            <p className="text-base font-semibold">Cada variable en {mes.toLowerCase()}</p>
+            <p className="text-sm text-muted-foreground">{etiqueta}</p>
           </div>
           <ul className="space-y-2.5">
             {variablesImp.map((v, vi) => {

@@ -65,11 +65,14 @@ export const notas: Record<string, string[]> = {
     'Todos los modelos mejoran conforme avanza el semestre y tienen más información.',
     'En enero detectan entre 72.9 % y 89.6 % de los casos; en abril, entre 97.9 % y 100 %.',
     'Cambiar a "Falsas alarmas": también bajan con los meses. El Árbol de decisión es el que más genera en febrero y marzo.',
+    'F2-score: combina casos detectados y falsas alarmas, con el doble de peso en detectar. Es la medida con la que se eligió el punto de riesgo.',
+    'PR-AUC: qué tan bien separa a quienes reprueban sin depender del punto de riesgo. Se usó para elegir la mejor configuración de cada modelo.',
   ],
   'comparacion-nota': [
     'Segundo enfoque: estimar la nota final.',
     'En enero todos los modelos se equivocan entre 14 y 15 puntos; en abril, entre 4 y 8.',
     'El Árbol de decisión es el que más se equivoca. La regresión lineal tiene el menor error promedio.',
+    'MAE: error promedio en puntos. RMSE: castiga más los errores grandes. Correlación: qué tanto se parece la nota estimada a la real (de 0 a 1).',
   ],
   regresion: [
     'La mejor regresión fue la lineal. Al final del semestre estima la nota con bastante precisión.',
